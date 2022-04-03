@@ -1,0 +1,2 @@
+export { generateDataSeries };
+export { setTotalSamples };

@@ -1,0 +1,33 @@
+dist
+dist-ssr
+*.local
+.idea/
+build
+.DS_Store
+*.tgz
+template/src/__tests__/__snapshots__/
+/.changelog
+.npm/
+package-lock.json
+__package_previews__
+.store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directory
+**/node_modules/**
+_node_modules
+.pnp.cjs
+.eslintcache
+node_modules/
+node_modules/*
+node_modules
+node_modules*
+
+
+# VSCode
+.vscode/settings.json
+.vscode/settings.local.json
