@@ -4,7 +4,7 @@ import { resolve } from "path";
 import jscc from "rollup-plugin-jscc";
 import { defineConfig } from "vite";
 import handlebars from "vite-plugin-handlebars";
-import manifest from "./dist/manifest.json";
+// import manifest from "./dist/manifest.json";
 import toolbarConfiguration from "./toolbarConfiguration.js";
 
 const algSrc = readFileSync(
@@ -18,10 +18,11 @@ const algExp = readFileSync(
 ).toString();
 const utils = readFileSync(resolve(__dirname, "utils.js")).toString();
 
-const imports = manifest["index.html"].imports.reduce((obj, item) => {
-  obj[item.slice(1).split(".")[0]] = manifest[item].file;
-  return obj;
-}, {});
+const imports = {};
+// manifest["index.html"].imports.reduce((obj, item) => {
+//   obj[item.slice(1).split(".")[0]] = manifest[item].file;
+//   return obj;
+// }, {});
 
 const replaceRules = {
   "//#ALG_ESM_IMPORTS": algImp,
