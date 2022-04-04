@@ -1,3 +1,7 @@
+function getRandom(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 const DEFAULT_DISPLACEMENT = 20; // arbitrary. Alternative: (start + end) / 2;
 let desiredPoints, iterations, actualPoints, base, powerOf2Plus1;
 

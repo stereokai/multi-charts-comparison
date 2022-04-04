@@ -8,19 +8,12 @@ import { defaults } from "./echartsDefaults";
 import { buildEchartsOptions } from "./echartsOptionsBuilder.js";
 import { throttle } from "./utils.js";
 
-let workerURL;
-// #if _DEVELOPMENT
-workerURL = new URL("./dataGenerator/DataGeneratorWorker.js", import.meta.url)
-  .href;
-//#endif
-// #if _PRODUCTION
-import "./dataGenerator/DataGeneratorWorker.js";
-workerURL = "$_WORKER_IMPORT_PROD";
-//#endif
-
-const workerPool = workerpool.pool(workerURL, {
-  maxWorkers: workerpool.cpus - 2,
-});
+const workerPool = workerpool.pool(
+  new URL("./dataGenerator/CompiledWorker.js", import.meta.url).href,
+  {
+    maxWorkers: workerpool.cpus - 2,
+  }
+);
 
 let chart;
 let prevSamplesPerChannel = 0;
@@ -121,7 +114,7 @@ function onDataGenerated(dataOperation) {
 export function initEcharts(samplesPerChannel) {
   prevSamplesPerChannel = samplesPerChannel;
   chart = echarts.init(document.querySelector("#chart"));
-  
+
   window.addEventListener(
     "resize",
     throttle(() => {

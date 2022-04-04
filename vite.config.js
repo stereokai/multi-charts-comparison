@@ -1,12 +1,14 @@
 import replace from "@rollup/plugin-replace";
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import copy from "rollup-plugin-copy-merge";
 import jscc from "rollup-plugin-jscc";
 import { defineConfig } from "vite";
 import handlebars from "vite-plugin-handlebars";
-// import manifest from "./dist/manifest.json";
 import toolbarConfiguration from "./toolbarConfiguration.js";
 
+// Sources
+const workerpool = "node_modules/workerpool/dist/workerpool.js";
 const algSrc = readFileSync(
   resolve(__dirname, "dataGenerator", "algorithm.src.js")
 ).toString();
@@ -17,12 +19,6 @@ const algExp = readFileSync(
   resolve(__dirname, "dataGenerator", "algorithm.exports.js")
 ).toString();
 const utils = readFileSync(resolve(__dirname, "utils.js")).toString();
-
-const imports = {};
-// manifest["index.html"].imports.reduce((obj, item) => {
-//   obj[item.slice(1).split(".")[0]] = manifest[item].file;
-//   return obj;
-// }, {});
 
 const replaceRules = {
   "//#ALG_ESM_IMPORTS": algImp,
@@ -35,18 +31,36 @@ const replaceRules = {
 const jsccRules = {
   values: {
     _DEVELOPMENT: process.env.NODE_ENV === "development",
-    _PRODUCTION: process.env.NODE_ENV === "production",
-    _WORKERPOOL_IMPORT:
-      process.env.NODE_ENV === "production"
-        ? imports["workerpool"]
-        : "node_modules/workerpool/dist/workerpool.js",
-    _WORKER_IMPORT_PROD: imports["DataGeneratorWorker"],
+  },
+  options: {
+    asloader: false,
   },
 };
+
+const copyTargets = [
+  {
+    src: [
+      resolve(__dirname, "dataGenerator", "algorithm.src.js"),
+      resolve(__dirname, "dataGenerator", "DataGeneratorWorker.js"),
+    ],
+    file: resolve(__dirname, "dataGenerator", "CompiledWorker.js"),
+  },
+];
+
+if (process.env.NODE_ENV === "production") {
+  copyTargets[0].src.unshift(resolve(__dirname, ...workerpool.split("/")));
+}
+if (process.env.NODE_ENV === "development") {
+  replaceRules["importScripts()"] = `importScripts("/${workerpool}")`;
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    copy({
+      hook: "buildStart",
+      targets: copyTargets,
+    }),
     replace(replaceRules),
     jscc(jsccRules),
     handlebars({
@@ -57,14 +71,11 @@ export default defineConfig({
     }),
   ],
   build: {
-    manifest: true,
-    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
           workerpool: ["workerpool"],
           echarts: ["echarts"],
-          DataGeneratorWorker: ["./dataGenerator/DataGeneratorWorker.js"],
         },
       },
     },
