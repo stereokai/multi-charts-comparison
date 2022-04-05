@@ -5,7 +5,7 @@ import copy from "rollup-plugin-copy-merge";
 import jscc from "rollup-plugin-jscc";
 import { defineConfig } from "vite";
 import handlebars from "vite-plugin-handlebars";
-import toolbarConfiguration from "./toolbarConfiguration.js";
+import { default as toolbarConfiguration } from "./models/ui.js";
 
 // Sources
 const workerpool = "node_modules/workerpool/dist/workerpool.js";

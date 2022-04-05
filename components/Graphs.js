@@ -1,12 +1,9 @@
 import * as echarts from "echarts";
-import {
-  defaultChannels as channels,
-  getRandomChannel,
-} from "./channelsConfiguration.js";
-import { dataOperation } from "./dataLayer.js";
-import { defaults } from "./echartsDefaults";
-import { buildEchartsOptions } from "./echartsOptionsBuilder.js";
-import { throttle } from "./utils.js";
+import { dataOperation } from "../dataGenerator/dataLayer.js";
+import { defaults } from "../echarts/echartsDefaults";
+import { buildEchartsOptions } from "../echarts/echartsOptionsBuilder.js";
+import { getRandomChannel, state as channels } from "../models/state.js";
+import { throttle } from "../utils.js";
 
 let chart;
 let prevSamplesPerChannel = 0;

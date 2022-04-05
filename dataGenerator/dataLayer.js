@@ -3,7 +3,7 @@ const rejecters = {};
 const workQueue = [];
 import workerpool from "workerpool";
 const workerPool = workerpool.pool(
-  new URL("./dataGenerator/CompiledWorker.js", import.meta.url).href,
+  new URL("./CompiledWorker.js", import.meta.url).href,
   {
     maxWorkers: 3,
   }

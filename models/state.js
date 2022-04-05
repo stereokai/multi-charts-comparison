@@ -1,6 +1,6 @@
-import { getRandom } from "./utils.js";
+import { getRandom } from "../utils.js";
 
-export const defaultChannels = [
+export const state = [
   {
     name: "PAT",
     min: -1000,

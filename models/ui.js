@@ -1,4 +1,4 @@
-const toolbarConfiguration = {
+const uiModel = {
   channels: {
     label: "Channels",
     min: 10,
@@ -24,4 +24,4 @@ const toolbarConfiguration = {
     label: "Last event",
   },
 };
-export default toolbarConfiguration;
+export default uiModel;

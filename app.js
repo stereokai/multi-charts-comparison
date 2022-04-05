@@ -1,5 +1,5 @@
-import * as graphs from "./Graphs.js";
-import { default as app } from "./toolbarConfiguration.js";
+import * as graphs from "./components/Graphs.js";
+import { default as app } from "./models/ui.js";
 import { debounce, throttle } from "./utils.js";
 
 const ECHARTS_EVENTS = {
