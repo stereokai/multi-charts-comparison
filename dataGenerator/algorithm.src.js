@@ -9,15 +9,6 @@ function setupAlgorithm() {
   iterations = Math.floor(Math.log(desiredPoints * 2 - 1) / Math.log(2));
   powerOf2Plus1 = 2 ** iterations + 1;
   actualPoints = desiredPoints + (desiredPoints % 2 ? 1 : 0);
-
-  const baseDate = new Date();
-  baseDate.setDate(baseDate.getDate() - 1);
-  const timestamp = baseDate.setHours(22);
-
-  base = new Array(actualPoints);
-  for (let i = 0; i < actualPoints; i++) {
-    base[i] = timestamp + i * 1000;
-  }
 }
 
 function setTotalSamples(samples) {
@@ -46,7 +37,7 @@ function generateDataSeries(
   }
 
   let iteration = 1;
-  const data = base.map((p) => [p, 0]);
+  const data = new Array(actualPoints).fill(0);
   data[0][1] = start;
 
   let vDis =
@@ -68,16 +59,17 @@ function generateDataSeries(
       }
 
       const a = data[i - skipDistance];
-      const b = data[i + skipDistance];
+      let b = data[i + skipDistance];
 
       // The fallback to `end` is only needed for the first iteration,
       // because (at line 63) we stop calculating midpoints past the number of desired points.
       // Unless the number of desired points is exactly a power of 2,
       // the end point will be out of the scope of the base array.
-      let midpoint = (a[1] + ((b && b[1]) || end)) / 2;
+      typeof b === "undefined" && (b = end);
+      let midpoint = (a + b) / 2;
       const isPositiveDisplacement = Math.random() < 0.5;
 
-      data[i][1] = isPositiveDisplacement
+      data[i] = isPositiveDisplacement
         ? Math.min(max, midpoint + vDis)
         : Math.max(min, midpoint - vDis);
     }

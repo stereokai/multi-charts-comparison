@@ -1,130 +1,19 @@
 import * as echarts from "echarts";
-import workerpool from "workerpool";
 import {
   defaultChannels as channels,
   getRandomChannel,
 } from "./channelsConfiguration.js";
+import { dataOperation } from "./dataLayer.js";
 import { defaults } from "./echartsDefaults";
 import { buildEchartsOptions } from "./echartsOptionsBuilder.js";
 import { throttle } from "./utils.js";
 
-const workerPool = workerpool.pool(
-  new URL("./dataGenerator/CompiledWorker.js", import.meta.url).href,
-  {
-    maxWorkers: workerpool.cpus - 2,
-  }
-);
-
 let chart;
 let prevSamplesPerChannel = 0;
-let lastOperation = newOperationId();
-const rejecters = {};
+let prevSamplesPerSecond = 0;
+let timeSeries;
+
 let onBeforeDataUpdate = () => {};
-
-const workQueue = [];
-
-function newOperationId() {
-  return Date.now();
-}
-
-function queueTask(task, data) {
-  workQueue.push(workerPool.exec(task, [data]));
-}
-
-function generateChannelData(channel, samples = prevSamplesPerChannel) {
-  queueTask("generateDataSeries", {
-    channel,
-    samples,
-  });
-}
-
-function clearQueue(operationId) {
-  console.log("Terminating operation", operationId);
-  rejecters[operationId] &&
-    rejecters[operationId](`Operation ${operationId} terminated`);
-  workerPool.terminate(true);
-  workQueue.length = 0;
-}
-
-function newOperation(operationId) {
-  clearQueue();
-  lastOperation = operationId;
-  return () => {
-    return new Promise((resolve, reject) => {
-      rejecters[operationId] = reject;
-      Promise.all(workQueue).then((results) => resolve(results));
-    });
-  };
-}
-
-function dataOperation(queueWork) {
-  const operationId = newOperationId();
-  const onOperationEnd = newOperation(operationId);
-  console.log(`Starting operation ${operationId}`);
-  queueWork();
-
-  return onOperationEnd().then((results) => {
-    if (lastOperation === operationId) {
-      console.log(`Operation ${operationId} ended with results`, results);
-      return results;
-    } else {
-      console.log(`Operation ${operationId} ended but was terminated`, results);
-      return Promise.reject(
-        `Operation ${operationId} ended but was terminated`
-      );
-    }
-  });
-}
-function updateEcharts() {
-  onBeforeDataUpdate(channels);
-  const settings = buildEchartsOptions(channels);
-  chart.setOption(Object.assign(defaults, settings), true);
-}
-
-function regenerateAllChannels(samplesPerChannel = null) {
-  return dataOperation(() => {
-    for (let i = 0; i < channels.length; i++) {
-      delete channels[i].data;
-      generateChannelData(channels[i], samplesPerChannel);
-    }
-  });
-}
-
-function setDataToChannels(channels, data) {
-  for (let i = 0; i < data.length; i++) {
-    channels[channels.length - data.length + i].data = data[i];
-  }
-}
-
-function onDataGenerated(dataOperation) {
-  chart.showLoading();
-  dataOperation
-    .then((data) => {
-      setDataToChannels(channels, data);
-      updateEcharts();
-    })
-    .catch((err) => {
-      console.log("Operation error", err);
-    })
-    .finally(() => {
-      chart.hideLoading();
-    });
-}
-
-export function initEcharts(samplesPerChannel) {
-  prevSamplesPerChannel = samplesPerChannel;
-  chart = echarts.init(document.querySelector("#chart"));
-
-  window.addEventListener(
-    "resize",
-    throttle(() => {
-      chart.resize();
-    }, 150)
-  );
-
-  onDataGenerated(regenerateAllChannels(samplesPerChannel));
-}
-
 export function on(...args) {
   if (args[0] === "onBeforeDataUpdate") {
     onBeforeDataUpdate = args[1];
@@ -134,17 +23,121 @@ export function on(...args) {
   chart.on(...args);
 }
 
+function generateTimestamps(totalSamples, samplesPerSecond) {
+  const baseDate = new Date();
+  baseDate.setDate(baseDate.getDate() - 1);
+  const timestamp = baseDate.setHours(22);
+
+  const samplesPerTimestampInSeconds = 1 / samplesPerSecond;
+  const samplesPerTimestampInMilliseconds = samplesPerTimestampInSeconds * 1000;
+
+  const timestamps = new Array(totalSamples);
+  for (let i = 0; i < totalSamples; i++) {
+    timestamps[i] = timestamp + i * samplesPerTimestampInMilliseconds;
+  }
+  return timestamps;
+}
+
+export function initEcharts(samplesPerChannel, samplesPerSecond) {
+  prevSamplesPerChannel = samplesPerChannel;
+  setSamplesPerSecond(samplesPerSecond);
+  chart = echarts.init(document.querySelector("#chart"));
+  window.chart = chart;
+  window.addEventListener(
+    "resize",
+    throttle(() => {
+      chart.resize();
+    }, 150)
+  );
+
+  setChartData(regenerateAllChannels(samplesPerChannel));
+}
+
+function buildEchartsDatasetArrays(channelsDataArray) {
+  const dataset = {};
+
+  for (let i = 0; i < channelsDataArray.length; i++) {
+    const channelNumber = channels.length - channelsDataArray.length + i;
+
+    dataset[`channel_${channelNumber}`] = channelsDataArray[i];
+  }
+
+  if (channelsDataArray.length === channels.length) {
+    dataset.timestamp = timeSeries;
+  }
+
+  return dataset;
+}
+
+function updateEcharts(dataset) {
+  onBeforeDataUpdate(channels);
+  const settings = buildEchartsOptions(channels, dataset);
+  chart.setOption(Object.assign(defaults, settings), {
+    replaceMerge: ["series", "yAxis", "xAxis", "grid"],
+  });
+  channels.forEach((channels) => {
+    if (channels.data) {
+      channels.data.length = 0;
+      channels.data = null;
+      delete channels.data;
+    }
+  });
+}
+
+function setChartData(dataOperation) {
+  chart.showLoading();
+  dataOperation
+    .then(buildEchartsDatasetArrays)
+    .then(updateEcharts)
+    .catch((err) => {
+      console.log("Operation error", err);
+    })
+    .finally(() => {
+      chart.hideLoading();
+    });
+}
+
+function setSamplesPerSecond(samplesPerSecond) {
+  prevSamplesPerSecond = samplesPerSecond;
+  timeSeries = generateTimestamps(prevSamplesPerChannel, samplesPerSecond);
+}
+
+function getGenerateDataSeriesTask(channel, samples = prevSamplesPerChannel) {
+  return {
+    name: "generateDataSeries",
+    data: {
+      channel,
+      samples,
+    },
+  };
+}
+
+function regenerateAllChannels(samplesPerChannel = null) {
+  return dataOperation((queueTask) => {
+    for (let i = 0; i < channels.length; i++) {
+      if (channels.data) {
+        channels.data.length = 0;
+        channels.data = null;
+        delete channels.data;
+      }
+      queueTask(getGenerateDataSeriesTask(channels[i], samplesPerChannel));
+    }
+  });
+}
+
 function addChannels(numberOfChannelsToAdd, shouldGenerateData = true) {
   if (numberOfChannelsToAdd < 1) {
     throw new Error("Can't add 0 channels");
   }
 
-  return dataOperation(() => {
+  return dataOperation((queueTask) => {
     for (let i = 0; i < numberOfChannelsToAdd; i++) {
-      const channelNumber = channels.length + i + 1;
+      const channelNumber = channels.length + 1;
       if (shouldGenerateData) {
-        generateChannelData(
-          channels[channels.push(getRandomChannel(channelNumber)) - 1]
+        queueTask(
+          getGenerateDataSeriesTask(
+            channels[channels.push(getRandomChannel(channelNumber)) - 1]
+          )
         );
       } else {
         channels.push(getRandomChannel(channelNumber));
@@ -153,7 +146,11 @@ function addChannels(numberOfChannelsToAdd, shouldGenerateData = true) {
   });
 }
 
-export function onSettingChange(numberOfChannels, totalSamples) {
+export function onSettingChange(
+  numberOfChannels,
+  samplesPerSecond,
+  totalSamples
+) {
   const samplesPerChannel = Math.floor(totalSamples / numberOfChannels);
   const channelsChange = numberOfChannels - channels.length;
   let operation;
@@ -168,6 +165,11 @@ export function onSettingChange(numberOfChannels, totalSamples) {
   // No. of samples per channel changed
   if (samplesPerChannel !== prevSamplesPerChannel) {
     prevSamplesPerChannel = samplesPerChannel;
+
+    if (samplesPerSecond !== prevSamplesPerSecond) {
+      setSamplesPerSecond(samplesPerSecond);
+    }
+
     operation = regenerateAllChannels(samplesPerChannel);
   }
 
@@ -176,5 +178,5 @@ export function onSettingChange(numberOfChannels, totalSamples) {
     operation = addChannels(channelsChange);
   }
 
-  onDataGenerated(operation);
+  setChartData(operation);
 }

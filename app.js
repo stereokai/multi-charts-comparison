@@ -66,7 +66,7 @@ function init() {
   labels.lastEventDuration = document.querySelector("#last-event-duration");
 
   updateTotalSamples();
-  graphs.initEcharts(app.total.value / app.channels.value);
+  graphs.initEcharts(app.total.value / app.channels.value, app.samples.value);
 
   graphs.on(ECHARTS_EVENTS.onBeforeDataUpdate, (channels) => {
     lastEvent = {
@@ -106,7 +106,11 @@ function updateTotalSamples() {
 }
 
 const updateGraphSettings = debounce(() => {
-  graphs.onSettingChange(app.channels.value, app.total.value);
+  graphs.onSettingChange(
+    app.channels.value,
+    app.samples.value,
+    app.total.value
+  );
 }, 150);
 
 function onSliderChange(event) {

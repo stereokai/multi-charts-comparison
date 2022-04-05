@@ -85,14 +85,17 @@ const seriesConfig = {
 function getSeriesConfig(channel, index) {
   return {
     ...seriesConfig,
-    data: channel.data,
+    encode: {
+      x: "timestamp",
+      y: `channel_${index}`,
+    },
     xAxisIndex: index,
     yAxisIndex: index,
   };
 }
 
-export function buildEchartsOptions(channels) {
-  return {
+export function buildEchartsOptions(channels, dataset) {
+  const options = {
     xAxis: channels.map((channel, i) => getXAxis(i)),
     yAxis: channels.map((channel, i) =>
       getYAxis(i, channel.name, {
@@ -108,4 +111,12 @@ export function buildEchartsOptions(channels) {
     grid: getGridConfig(channels),
     series: channels.map((channel, i) => getSeriesConfig(channel, i)),
   };
+
+  if (dataset) {
+    options.dataset = {
+      source: dataset,
+    };
+  }
+
+  return options;
 }

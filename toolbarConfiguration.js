@@ -9,7 +9,7 @@ const toolbarConfiguration = {
     label: "Sleep period (h)",
     min: 8,
     max: 14,
-    value: 10,
+    value: 1,
   },
   samples: {
     label: "Samples per second",
