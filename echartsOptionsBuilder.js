@@ -105,7 +105,7 @@ export function buildEchartsOptions(channels, dataset) {
       })
     ),
     dataZoom: [
-      // getDataZoomConfig(channels, { type: "inside" }),
+      getDataZoomConfig(channels, { type: "inside" }),
       getDataZoomConfig(channels, { type: "slider", top: "top" }),
     ],
     grid: getGridConfig(channels),

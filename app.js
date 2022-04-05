@@ -49,7 +49,7 @@ const ECHARTS_EVENT_HANDLERS = {
 const FRIENDLY_NAMES = {
   [ECHARTS_EVENTS.init]: "First render",
   [ECHARTS_EVENTS.onBeforeDataUpdate]: "Data change",
-  [ECHARTS_EVENTS.dataZoom]: "Zoom/Slide",
+  [ECHARTS_EVENTS.dataZoom]: "Zoom/Pan",
 };
 
 let lastEvent = null;
