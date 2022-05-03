@@ -6,13 +6,14 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "NODE_ENV=development vite",
+    "dev": "cross-env NODE_ENV=development vite",
     "postbuild": "node postbuild.js",
-    "build": "NODE_ENV=production vite build",
+    "build": "cross-env NODE_ENV=production vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "~4.0.0",
+    "cross-env": "^7.0.3",
     "rollup": "~2.70.1",
     "rollup-plugin-copy-merge": "~0.2.0",
     "rollup-plugin-jscc": "~2.0.0",

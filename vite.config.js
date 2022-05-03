@@ -7,6 +7,10 @@ import { defineConfig } from "vite";
 import handlebars from "vite-plugin-handlebars";
 import { default as toolbarConfiguration } from "./models/ui.js";
 
+function toPosixPath(address) {
+  return address.replace(/\\/g, '/')
+}
+
 // Sources
 const workerpool = "node_modules/workerpool/dist/workerpool.js";
 const algSrc = readFileSync(
@@ -40,15 +44,15 @@ const jsccRules = {
 const copyTargets = [
   {
     src: [
-      resolve(__dirname, "dataGenerator", "algorithm.src.js"),
-      resolve(__dirname, "dataGenerator", "DataGeneratorWorker.js"),
+      toPosixPath(resolve(__dirname, "dataGenerator", "algorithm.src.js")),
+      toPosixPath(resolve(__dirname, "dataGenerator", "DataGeneratorWorker.js")),
     ],
-    file: resolve(__dirname, "dataGenerator", "CompiledWorker.js"),
+    file: toPosixPath(resolve(__dirname, "dataGenerator", "CompiledWorker.js")),
   },
 ];
 
 if (process.env.NODE_ENV === "production") {
-  copyTargets[0].src.unshift(resolve(__dirname, ...workerpool.split("/")));
+  copyTargets[0].src.unshift(toPosixPath(resolve(__dirname, ...workerpool.split("/"))));
 }
 if (process.env.NODE_ENV === "development") {
   replaceRules["importScripts()"] = `importScripts("/${workerpool}")`;
