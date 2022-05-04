@@ -40,7 +40,7 @@ export function initChart(samplesPerChannel, samplesPerSecond) {
   setSamplesPerSecond(samplesPerSecond);
 
   chart.init();
-  setChartData(regenerateAllChannels(samplesPerChannel));
+  setChartData(() => regenerateAllChannels(samplesPerChannel));
 }
 
 function updateChart(dataset) {
@@ -50,7 +50,7 @@ function updateChart(dataset) {
 
 function setChartData(dataOperation) {
   chart.showLoading();
-  dataOperation
+  dataOperation()
     .then(updateChart)
     .catch((err) => {
       console.log("Operation error", err);
@@ -89,12 +89,12 @@ export function onSettingChange(
       setSamplesPerSecond(samplesPerSecond);
     }
 
-    operation = regenerateAllChannels(samplesPerChannel);
+    operation = () => regenerateAllChannels(samplesPerChannel);
   }
 
   // Channels added
   if (channelsChange > 0) {
-    operation = addChannels(channelsChange, samplesPerChannel);
+    operation = () => addChannels(channelsChange, samplesPerChannel);
   }
 
   setChartData(operation);
