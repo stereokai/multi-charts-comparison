@@ -8,7 +8,7 @@ import handlebars from "vite-plugin-handlebars";
 import { default as toolbarConfiguration } from "./models/ui.js";
 
 function toPosixPath(address) {
-  return address.replace(/\\/g, '/')
+  return address.replace(/\\/g, "/");
 }
 
 // Sources
@@ -22,13 +22,15 @@ const algImp = readFileSync(
 const algExp = readFileSync(
   resolve(__dirname, "dataGenerator", "algorithm.exports.js")
 ).toString();
-const utils = readFileSync(resolve(__dirname, "utils.js")).toString();
+const dataGeneratorTasks = readFileSync(
+  resolve(__dirname, "dataGenerator", "DataGeneratorTasks.js")
+).toString();
 
 const replaceRules = {
   "//#ALG_ESM_IMPORTS": algImp,
   "//#ALGORITHM": algSrc,
   "//#ALG_ESM_EXPORTS": algExp,
-  "//#IMPORT_UTILS": utils.replaceAll("export", ""),
+  "//#DATA_GENERATOR_TASKS": dataGeneratorTasks,
   delimiters: ["", ""],
 };
 
@@ -45,17 +47,22 @@ const copyTargets = [
   {
     src: [
       toPosixPath(resolve(__dirname, "dataGenerator", "algorithm.src.js")),
-      toPosixPath(resolve(__dirname, "dataGenerator", "DataGeneratorWorker.js")),
+      toPosixPath(resolve(__dirname, "dataGenerator", "DataGeneratorTasks.js")),
+      toPosixPath(
+        resolve(__dirname, "dataGenerator", "DataGeneratorWorker.js")
+      ),
     ],
     file: toPosixPath(resolve(__dirname, "dataGenerator", "CompiledWorker.js")),
   },
 ];
 
 if (process.env.NODE_ENV === "production") {
-  copyTargets[0].src.unshift(toPosixPath(resolve(__dirname, ...workerpool.split("/"))));
+  copyTargets[0].src.unshift(
+    toPosixPath(resolve(__dirname, ...workerpool.split("/")))
+  );
 }
 if (process.env.NODE_ENV === "development") {
-  replaceRules["importScripts()"] = `importScripts("/${workerpool}")`;
+  replaceRules["//importScripts()"] = `importScripts("/${workerpool}")`;
 }
 
 // https://vitejs.dev/config/

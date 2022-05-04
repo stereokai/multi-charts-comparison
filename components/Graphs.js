@@ -1,11 +1,11 @@
-import * as echarts from "echarts";
-import { dataOperation } from "../dataGenerator/dataLayer.js";
-import { defaults } from "../echarts/echartsDefaults";
-import { buildEchartsOptions } from "../echarts/echartsOptionsBuilder.js";
-import { getRandomChannel, state as channels } from "../models/state.js";
-import { throttle } from "../utils.js";
+import {
+  addChannels,
+  channels,
+  regenerateAllChannels,
+  removeChannels,
+} from "../models/state.js";
+import * as chart from "./Echarts.js";
 
-let chart;
 let prevSamplesPerChannel = 0;
 let prevSamplesPerSecond = 0;
 let timeSeries;
@@ -35,57 +35,23 @@ function generateTimestamps(totalSamples, samplesPerSecond) {
   return timestamps;
 }
 
-export function initEcharts(samplesPerChannel, samplesPerSecond) {
+export function initChart(samplesPerChannel, samplesPerSecond) {
   prevSamplesPerChannel = samplesPerChannel;
   setSamplesPerSecond(samplesPerSecond);
-  chart = echarts.init(document.querySelector("#chart"));
-  window.chart = chart;
-  window.addEventListener(
-    "resize",
-    throttle(() => {
-      chart.resize();
-    }, 150)
-  );
 
+  chart.init();
   setChartData(regenerateAllChannels(samplesPerChannel));
 }
 
-function buildEchartsDatasetArrays(channelsDataArray) {
-  const dataset = {};
-
-  for (let i = 0; i < channelsDataArray.length; i++) {
-    const channelNumber = channels.length - channelsDataArray.length + i;
-
-    dataset[`channel_${channelNumber}`] = channelsDataArray[i];
-  }
-
-  if (channelsDataArray.length === channels.length) {
-    dataset.timestamp = timeSeries;
-  }
-
-  return dataset;
-}
-
-function updateEcharts(dataset) {
+function updateChart(dataset) {
   onBeforeDataUpdate(channels);
-  const settings = buildEchartsOptions(channels, dataset);
-  chart.setOption(Object.assign(defaults, settings), {
-    replaceMerge: ["series", "yAxis", "xAxis", "grid"],
-  });
-  channels.forEach((channels) => {
-    if (channels.data) {
-      channels.data.length = 0;
-      channels.data = null;
-      delete channels.data;
-    }
-  });
+  chart.update(dataset, timeSeries);
 }
 
 function setChartData(dataOperation) {
   chart.showLoading();
   dataOperation
-    .then(buildEchartsDatasetArrays)
-    .then(updateEcharts)
+    .then(updateChart)
     .catch((err) => {
       console.log("Operation error", err);
     })
@@ -99,50 +65,6 @@ function setSamplesPerSecond(samplesPerSecond) {
   timeSeries = generateTimestamps(prevSamplesPerChannel, samplesPerSecond);
 }
 
-function getGenerateDataSeriesTask(channel, samples = prevSamplesPerChannel) {
-  return {
-    name: "generateDataSeries",
-    data: {
-      channel,
-      samples,
-    },
-  };
-}
-
-function regenerateAllChannels(samplesPerChannel = null) {
-  return dataOperation((queueTask) => {
-    for (let i = 0; i < channels.length; i++) {
-      if (channels.data) {
-        channels.data.length = 0;
-        channels.data = null;
-        delete channels.data;
-      }
-      queueTask(getGenerateDataSeriesTask(channels[i], samplesPerChannel));
-    }
-  });
-}
-
-function addChannels(numberOfChannelsToAdd, shouldGenerateData = true) {
-  if (numberOfChannelsToAdd < 1) {
-    throw new Error("Can't add 0 channels");
-  }
-
-  return dataOperation((queueTask) => {
-    for (let i = 0; i < numberOfChannelsToAdd; i++) {
-      const channelNumber = channels.length + 1;
-      if (shouldGenerateData) {
-        queueTask(
-          getGenerateDataSeriesTask(
-            channels[channels.push(getRandomChannel(channelNumber)) - 1]
-          )
-        );
-      } else {
-        channels.push(getRandomChannel(channelNumber));
-      }
-    }
-  });
-}
-
 export function onSettingChange(
   numberOfChannels,
   samplesPerSecond,
@@ -154,8 +76,8 @@ export function onSettingChange(
 
   // Channels removed
   if (channelsChange < 0) {
-    channels.splice(channels.length + channelsChange, -channelsChange);
-    updateEcharts();
+    removeChannels(channelsChange);
+    updateChart();
     return;
   }
 
@@ -172,7 +94,7 @@ export function onSettingChange(
 
   // Channels added
   if (channelsChange > 0) {
-    operation = addChannels(channelsChange);
+    operation = addChannels(channelsChange, samplesPerChannel);
   }
 
   setChartData(operation);

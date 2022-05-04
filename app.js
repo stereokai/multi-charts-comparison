@@ -66,7 +66,7 @@ function init() {
   labels.lastEventDuration = document.querySelector("#last-event-duration");
 
   updateTotalSamples();
-  graphs.initEcharts(app.total.value / app.channels.value, app.samples.value);
+  graphs.initChart(app.total.value / app.channels.value, app.samples.value);
 
   graphs.on(ECHARTS_EVENTS.onBeforeDataUpdate, (channels) => {
     lastEvent = {

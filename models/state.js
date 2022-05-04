@@ -1,6 +1,9 @@
+import { dataOperation } from "../dataGenerator/dataLayer.js";
 import { getRandom } from "../utils.js";
 
-export const state = [
+//#DATA_GENERATOR_TASKS
+
+export const channels = [
   {
     name: "PAT",
     min: -1000,
@@ -69,10 +72,48 @@ export const state = [
   { name: "Channel 10", displacement: 300, smoothing: 1.2 },
 ];
 
-export function getRandomChannel(number) {
+function getRandomChannel(number) {
   return {
     name: "Channel " + number,
     displacement: getRandom(30, 400),
     smoothing: getRandom(0.1, 2),
   };
+}
+
+export function regenerateAllChannels(samplesPerChannel) {
+  return dataOperation((queueTask) => {
+    channels.forEach((channel) =>
+      queueTask(getDataTaskConfig(channel, samplesPerChannel))
+    );
+  });
+}
+
+export function addChannels(
+  numberOfChannelsToAdd,
+  samplesPerChannel,
+  shouldGenerateData = true
+) {
+  if (numberOfChannelsToAdd < 1) {
+    throw new Error("Can't add 0 channels");
+  }
+
+  return dataOperation((queueTask) => {
+    for (let i = 0; i < numberOfChannelsToAdd; i++) {
+      const channelNumber = channels.length + 1;
+      if (shouldGenerateData) {
+        queueTask(
+          getDataTaskConfig(
+            channels[channels.push(getRandomChannel(channelNumber)) - 1],
+            samplesPerChannel
+          )
+        );
+      } else {
+        channels.push(getRandomChannel(channelNumber));
+      }
+    }
+  });
+}
+
+export function removeChannels(channelsChange) {
+  channels.splice(channels.length + channelsChange, -channelsChange);
 }

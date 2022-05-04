@@ -1,9 +1,9 @@
 //#if _DEVELOPMENT
-importScripts();
+//importScripts();
 //#endif
 
 workerpool.worker({
-  generateDataSeries: (data) => {
+  [DATA_GENERATOR_TASKS.generateDataSeries]: (data) => {
     return generateDataSeries(
       data.samples,
       data.channel.min,
@@ -14,7 +14,7 @@ workerpool.worker({
       data.channel.end
     );
   },
-  setTotalSamples: (data) => {
+  [DATA_GENERATOR_TASKS.setTotalSamples]: (data) => {
     setTotalSamples(data.samples);
   },
 });
