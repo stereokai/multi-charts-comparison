@@ -1,6 +1,6 @@
 import replace from "@rollup/plugin-replace";
-import { readFileSync } from "fs";
-import { resolve } from "path";
+import { readdirSync, readFileSync, statSync } from "fs";
+import { join, resolve } from "path";
 import copy from "rollup-plugin-copy-merge";
 import jscc from "rollup-plugin-jscc";
 import { defineConfig } from "vite";
@@ -10,6 +10,11 @@ import { default as toolbarConfiguration } from "./models/ui.js";
 
 function toPosixPath(address) {
   return address.replace(/\\/g, "/");
+}
+function getDirectories(srcPath) {
+  return readdirSync(srcPath).filter((file) =>
+    statSync(join(srcPath, file)).isDirectory()
+  );
 }
 
 // Sources
@@ -26,12 +31,16 @@ const algExp = readFileSync(
 const dataGeneratorTasks = readFileSync(
   resolve(__dirname, "dataGenerator", "DataGeneratorTasks.js")
 ).toString();
+const renderers = getDirectories(resolve(__dirname, "renderers"))
+  .map((dirName) => `"${dirName}"`)
+  .join(",");
 
 const replaceRules = {
   "//#ALG_ESM_IMPORTS": algImp,
   "//#ALGORITHM": algSrc,
   "//#ALG_ESM_EXPORTS": algExp,
   "//#DATA_GENERATOR_TASKS": dataGeneratorTasks,
+  "//#RENDERERS": renderers,
   delimiters: ["", ""],
 };
 
@@ -69,7 +78,6 @@ if (process.env.NODE_ENV === "development") {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    dynamicImport(),
     copy({
       hook: "buildStart",
       targets: copyTargets,
@@ -82,6 +90,7 @@ export default defineConfig({
       },
       partialDirectory: resolve(__dirname, "partials"),
     }),
+    dynamicImport(),
   ],
   build: {
     rollupOptions: {

@@ -1,5 +1,5 @@
-import GRAPH_EVENTS from "../Graphs/graphEvents.js";
-import { debounce, throttle } from "../utils.js";
+import GRAPH_EVENTS from "../../Graphs/graphEvents.js";
+import { debounce, throttle } from "../../utils.js";
 
 export const ECHARTS_EVENTS = {
   onBeforeDataUpdate: "onBeforeDataUpdate",

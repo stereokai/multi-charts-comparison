@@ -1,6 +1,6 @@
 import * as echarts from "echarts";
-import { channels } from "../models/state.js";
-import { throttle } from "../utils.js";
+import { channels } from "../../models/state.js";
+import { throttle } from "../../utils.js";
 import { defaults } from "./echartsDefaults";
 import { ECHARTS_EVENT_HANDLERS, eventHandlers, on } from "./echartsEvents.js";
 import { buildEchartsOptions } from "./echartsOptionsBuilder.js";
