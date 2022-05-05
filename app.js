@@ -16,8 +16,10 @@ function init() {
   labels.total = document.querySelector("#total-samples");
   labels.lastEvent = document.querySelector("#last-event");
   labels.lastEventDuration = document.querySelector("#last-event-duration");
+  labels.chartHeader = document.querySelector("#chart-header");
 
   updateTotalSamples();
+  labels.chartHeader.innerHTML = graphs.renderer;
   graphs.initGraph(app.total.value / app.channels.value, app.samples.value);
   Object.keys(graphs.EVENTS).forEach((event) => {
     graphs.on(graphs.EVENTS[event], onGraphEvent);

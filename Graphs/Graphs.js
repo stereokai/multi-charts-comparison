@@ -5,14 +5,14 @@ import {
   removeChannels,
 } from "@/models/state.js";
 import { renderer } from "@/router.js";
+export { default as EVENTS } from "./graphEvents.js";
+export { renderer };
 
 const chart = await import(`@/renderers/${renderer}/${renderer}.js`);
 
 let prevSamplesPerChannel = 0;
 let prevSamplesPerSecond = 0;
 let timeSeries;
-
-export { default as EVENTS } from "./graphEvents.js";
 
 export function on(...args) {
   chart.on(...args);
