@@ -19,9 +19,7 @@ export function on(...args) {
 }
 
 export function initGraph(samplesPerChannel, samplesPerSecond) {
-  prevSamplesPerChannel = samplesPerChannel;
-  setSamplesPerSecond(samplesPerSecond);
-
+  onTotalSamplesChange(samplesPerChannel, samplesPerSecond);
   chart.init();
   setChartData(() => regenerateAllChannels(samplesPerChannel));
 }
@@ -42,12 +40,14 @@ function setChartData(dataOperation) {
     });
 }
 
-function setSamplesPerSecond(samplesPerSecond) {
+function onTotalSamplesChange(samplesPerChannel, samplesPerSecond) {
+  prevSamplesPerChannel = samplesPerChannel;
   prevSamplesPerSecond = samplesPerSecond;
-  timeSeries = generateTimestamps(prevSamplesPerChannel, samplesPerSecond);
+
+  timeSeries = generateTimeseries(samplesPerChannel, samplesPerSecond);
 }
 
-function generateTimestamps(totalSamples, samplesPerSecond) {
+function generateTimeseries(totalSamples, samplesPerSecond) {
   const baseDate = new Date();
   baseDate.setDate(baseDate.getDate() - 1);
   const timestamp = baseDate.setHours(22);
@@ -79,13 +79,11 @@ export function onSettingChange(
   }
 
   // No. of samples per channel changed
-  if (samplesPerChannel !== prevSamplesPerChannel) {
-    prevSamplesPerChannel = samplesPerChannel;
-
-    if (samplesPerSecond !== prevSamplesPerSecond) {
-      setSamplesPerSecond(samplesPerSecond);
-    }
-
+  if (
+    samplesPerChannel !== prevSamplesPerChannel ||
+    samplesPerSecond !== prevSamplesPerSecond
+  ) {
+    onTotalSamplesChange(samplesPerChannel, samplesPerSecond);
     operation = () => regenerateAllChannels(samplesPerChannel);
   }
 
