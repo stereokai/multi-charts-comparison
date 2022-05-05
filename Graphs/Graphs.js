@@ -1,41 +1,22 @@
+import * as chart from "../Echarts/Echarts.js";
 import {
   addChannels,
   channels,
   regenerateAllChannels,
   removeChannels,
 } from "../models/state.js";
-import * as chart from "./Echarts.js";
 
 let prevSamplesPerChannel = 0;
 let prevSamplesPerSecond = 0;
 let timeSeries;
 
-let onBeforeDataUpdate = () => {};
-export function on(...args) {
-  if (args[0] === "onBeforeDataUpdate") {
-    onBeforeDataUpdate = args[1];
-    return;
-  }
+export { default as EVENTS } from "./graphEvents.js";
 
+export function on(...args) {
   chart.on(...args);
 }
 
-function generateTimestamps(totalSamples, samplesPerSecond) {
-  const baseDate = new Date();
-  baseDate.setDate(baseDate.getDate() - 1);
-  const timestamp = baseDate.setHours(22);
-
-  const samplesPerTimestampInSeconds = 1 / samplesPerSecond;
-  const samplesPerTimestampInMilliseconds = samplesPerTimestampInSeconds * 1000;
-
-  const timestamps = new Array(totalSamples);
-  for (let i = 0; i < totalSamples; i++) {
-    timestamps[i] = timestamp + i * samplesPerTimestampInMilliseconds;
-  }
-  return timestamps;
-}
-
-export function initChart(samplesPerChannel, samplesPerSecond) {
+export function initGraph(samplesPerChannel, samplesPerSecond) {
   prevSamplesPerChannel = samplesPerChannel;
   setSamplesPerSecond(samplesPerSecond);
 
@@ -44,7 +25,6 @@ export function initChart(samplesPerChannel, samplesPerSecond) {
 }
 
 function updateChart(dataset) {
-  onBeforeDataUpdate(channels);
   chart.update(dataset, timeSeries);
 }
 
@@ -63,6 +43,21 @@ function setChartData(dataOperation) {
 function setSamplesPerSecond(samplesPerSecond) {
   prevSamplesPerSecond = samplesPerSecond;
   timeSeries = generateTimestamps(prevSamplesPerChannel, samplesPerSecond);
+}
+
+function generateTimestamps(totalSamples, samplesPerSecond) {
+  const baseDate = new Date();
+  baseDate.setDate(baseDate.getDate() - 1);
+  const timestamp = baseDate.setHours(22);
+
+  const samplesPerTimestampInSeconds = 1 / samplesPerSecond;
+  const samplesPerTimestampInMilliseconds = samplesPerTimestampInSeconds * 1000;
+
+  const timestamps = new Array(totalSamples);
+  for (let i = 0; i < totalSamples; i++) {
+    timestamps[i] = timestamp + i * samplesPerTimestampInMilliseconds;
+  }
+  return timestamps;
 }
 
 export function onSettingChange(

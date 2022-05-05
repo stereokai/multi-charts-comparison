@@ -1,62 +1,14 @@
-import * as graphs from "./components/Graphs.js";
+import * as graphs from "./Graphs/Graphs.js";
 import { default as app } from "./models/ui.js";
-import { debounce, throttle } from "./utils.js";
-
-const ECHARTS_EVENTS = {
-  init: "init",
-  onBeforeDataUpdate: "onBeforeDataUpdate",
-  dataZoom: "dataZoom",
-  brushselected: "brushselected",
-  finished: "finished",
-};
-
-const zoomHandler = throttle(() => {
-  lastEvent = {
-    type: ECHARTS_EVENTS.dataZoom,
-    timestamp: performance.now(),
-  };
-}, 150);
-const finishHandler = debounce(() => {
-  if (lastEvent) {
-    const duration =
-      ((performance.now() - lastEvent.timestamp) / 1000).toFixed(2) + "s";
-    let eventName;
-
-    if (
-      lastEvent.type === ECHARTS_EVENTS.onBeforeDataUpdate &&
-      !hasInitialized
-    ) {
-      eventName = FRIENDLY_NAMES[ECHARTS_EVENTS.init];
-      hasInitialized = true;
-    } else {
-      eventName = FRIENDLY_NAMES[lastEvent.type];
-    }
-
-    console.log(`Last event was ${lastEvent.type} and took ${duration}`);
-    labels.lastEvent.innerHTML = eventName;
-    labels.lastEventDuration.innerHTML = duration;
-
-    lastEvent = null;
-  }
-}, 100);
-
-const ECHARTS_EVENT_HANDLERS = {
-  [ECHARTS_EVENTS.dataZoom]: zoomHandler,
-  [ECHARTS_EVENTS.brushselected]: zoomHandler,
-  [ECHARTS_EVENTS.finished]: finishHandler,
-};
-
-const FRIENDLY_NAMES = {
-  [ECHARTS_EVENTS.init]: "First render",
-  [ECHARTS_EVENTS.onBeforeDataUpdate]: "Data change",
-  [ECHARTS_EVENTS.dataZoom]: "Zoom/Pan",
-};
-
-let lastEvent = null;
-
-let hasInitialized = false;
+import { debounce } from "./utils.js";
 
 const labels = {};
+const FRIENDLY_NAMES = {
+  [graphs.EVENTS.init]: "First render",
+  [graphs.EVENTS.render]: "Data change",
+  [graphs.EVENTS.zoomPan]: "Zoom/Pan",
+};
+
 function init() {
   labels.channels = document.querySelector("#label-channels");
   labels.period = document.querySelector("#label-period");
@@ -66,19 +18,9 @@ function init() {
   labels.lastEventDuration = document.querySelector("#last-event-duration");
 
   updateTotalSamples();
-  graphs.initChart(app.total.value / app.channels.value, app.samples.value);
-
-  graphs.on(ECHARTS_EVENTS.onBeforeDataUpdate, (channels) => {
-    lastEvent = {
-      type: ECHARTS_EVENTS.onBeforeDataUpdate,
-      timestamp: performance.now(),
-    };
-  });
-  graphs.on(ECHARTS_EVENTS.brushselected, () => {
-    ECHARTS_EVENT_HANDLERS[ECHARTS_EVENTS.brushselected]();
-  });
-  graphs.on(ECHARTS_EVENTS.finished, () => {
-    ECHARTS_EVENT_HANDLERS[ECHARTS_EVENTS.finished]();
+  graphs.initGraph(app.total.value / app.channels.value, app.samples.value);
+  Object.keys(graphs.EVENTS).forEach((event) => {
+    graphs.on(graphs.EVENTS[event], onGraphEvent);
   });
 
   const rangeChannels = document.querySelector("#range-channels");
@@ -120,6 +62,15 @@ function onSliderChange(event) {
   app[name].value = value;
   updateTotalSamples();
   updateGraphSettings();
+}
+
+function onGraphEvent(graphEvent) {
+  console.log(
+    `Last event was ${graphEvent.type} and took ${graphEvent.duration}`
+  );
+
+  labels.lastEvent.innerHTML = FRIENDLY_NAMES[graphEvent.type];
+  labels.lastEventDuration.innerHTML = graphEvent.duration.toFixed(2) + "s";
 }
 
 document.addEventListener("DOMContentLoaded", () => init());
