@@ -1,4 +1,3 @@
-import * as chart from "../Echarts/Echarts.js";
 import {
   addChannels,
   channels,
@@ -6,6 +5,11 @@ import {
   removeChannels,
 } from "../models/state.js";
 
+let pathname = document.location.pathname;
+pathname = pathname.substring(pathname.lastIndexOf("/") + 1);
+pathname = pathname.charAt(0).toUpperCase() + pathname.slice(1);
+
+const chart = await import(`../${pathname}/${pathname}.js`);
 let prevSamplesPerChannel = 0;
 let prevSamplesPerSecond = 0;
 let timeSeries;

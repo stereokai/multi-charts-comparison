@@ -9,6 +9,7 @@ specifiers:
   rollup-plugin-jscc: ~2.0.0
   sanitize.css: ~13.0.0
   vite: 2.9.1
+  vite-plugin-dynamic-import: ~0.9.3
   vite-plugin-handlebars: ~1.6.0
   workerpool: ~6.2.0
 
@@ -24,6 +25,7 @@ devDependencies:
   rollup-plugin-copy-merge: 0.2.0
   rollup-plugin-jscc: 2.0.0_rollup@2.70.1
   vite: 2.9.1
+  vite-plugin-dynamic-import: 0.9.3
   vite-plugin-handlebars: 1.6.0
 
 packages:
@@ -104,6 +106,11 @@ packages:
 
   /@types/node/17.0.23:
     resolution: {integrity: sha512-UxDxWn7dl97rKVeVS61vErvw086aCYhDLyvRQZ5Rk65rZKepaFdm53GeqXaKBuOhED4e9uWq34IC3TdSdJJ2Gw==}
+    dev: true
+
+  /acorn-walk/8.2.0:
+    resolution: {integrity: sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==}
+    engines: {node: '>=0.4.0'}
     dev: true
 
   /array-union/2.1.0:
@@ -771,6 +778,13 @@ packages:
     engines: {node: '>= 4.0.0'}
     dev: true
 
+  /vite-plugin-dynamic-import/0.9.3:
+    resolution: {integrity: sha512-hIyHfiPkIKPq9gNBKCE++jZd0ICYmfWC5IgEspaM2TCFHQtjkqgkTSqjLtYWZeKM8c2u7nt5BReYIljQMHQdFA==}
+    dependencies:
+      fast-glob: 3.2.11
+      vite-plugin-utils: 0.1.0
+    dev: true
+
   /vite-plugin-handlebars/1.6.0:
     resolution: {integrity: sha512-/TZ2FadScvJW6fmQ+3m3stm6ns+tDZ3VAgzEkSQYQurAnaQ/3MJfidhmTXzD1Hu1iwgkI3lNuEqybzjjKemCTg==}
     dependencies:
@@ -780,6 +794,13 @@ packages:
       - less
       - sass
       - stylus
+    dev: true
+
+  /vite-plugin-utils/0.1.0:
+    resolution: {integrity: sha512-zmW5venCPEZ5hRDmwhHdxHAcmTXYBF0MobZQQBGz92VkdHR9Mm3hf7dioPnA7ahHs32HdjI1Bpxisg5IhH4bvg==}
+    dependencies:
+      acorn-walk: 8.2.0
+      fast-glob: 3.2.11
     dev: true
 
   /vite/2.9.1:

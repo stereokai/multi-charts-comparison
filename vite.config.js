@@ -4,6 +4,7 @@ import { resolve } from "path";
 import copy from "rollup-plugin-copy-merge";
 import jscc from "rollup-plugin-jscc";
 import { defineConfig } from "vite";
+import dynamicImport from "vite-plugin-dynamic-import";
 import handlebars from "vite-plugin-handlebars";
 import { default as toolbarConfiguration } from "./models/ui.js";
 
@@ -68,6 +69,7 @@ if (process.env.NODE_ENV === "development") {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    dynamicImport(),
     copy({
       hook: "buildStart",
       targets: copyTargets,

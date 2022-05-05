@@ -72,5 +72,10 @@ function onGraphEvent(graphEvent) {
   labels.lastEvent.innerHTML = FRIENDLY_NAMES[graphEvent.type];
   labels.lastEventDuration.innerHTML = graphEvent.duration.toFixed(2) + "s";
 }
-
-document.addEventListener("DOMContentLoaded", () => init());
+if (document.readyState == "complete") {
+  init();
+} else {
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
+  });
+}
