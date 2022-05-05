@@ -1,5 +1,5 @@
-import { dataOperation } from "../dataGenerator/dataLayer.js";
-import { getRandom } from "../utils.js";
+import { dataOperation } from "@/dataGenerator/dataLayer.js";
+import { getRandom } from "@/utils.js";
 
 //#DATA_GENERATOR_TASKS
 

@@ -7,6 +7,7 @@ import { defineConfig } from "vite";
 import dynamicImport from "vite-plugin-dynamic-import";
 import handlebars from "vite-plugin-handlebars";
 import { default as toolbarConfiguration } from "./models/ui.js";
+import { aliasesForVite } from "./pathbroker.mjs";
 
 function toPosixPath(address) {
   return address.replace(/\\/g, "/");
@@ -92,6 +93,9 @@ export default defineConfig({
     }),
     dynamicImport(),
   ],
+  resolve: {
+    alias: [...aliasesForVite],
+  },
   build: {
     rollupOptions: {
       output: {

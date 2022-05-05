@@ -3,10 +3,10 @@ import {
   channels,
   regenerateAllChannels,
   removeChannels,
-} from "../models/state.js";
-import { renderer } from "../router.js";
+} from "@/models/state.js";
+import { renderer } from "@/router.js";
 
-const chart = await import(`../renderers/${renderer}/${renderer}.js`);
+const chart = await import(`@/renderers/${renderer}/${renderer}.js`);
 
 let prevSamplesPerChannel = 0;
 let prevSamplesPerSecond = 0;
