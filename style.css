@@ -63,3 +63,20 @@ body {
   width: 2rem;
   flex-shrink: 0;
 }
+
+.button {
+  padding: 0.5rem 1rem;
+  background: #0075ff;
+  color: white;
+  border-radius: 2rem;
+  text-decoration: none;
+}
+
+.button.on {
+  background: #03a9f4;
+}
+
+#renderers > .button {
+  display: inline-block;
+  margin: 0.7rem;
+}

@@ -1,6 +1,7 @@
-import * as graphs from "./Graphs/Graphs.js";
-import { default as app } from "./models/ui.js";
-import { debounce } from "./utils.js";
+import * as graphs from "@/Graphs/Graphs.js";
+import { default as app } from "@/models/ui.js";
+import { RENDERERS } from "@/router.js";
+import { debounce } from "@/utils.js";
 
 const labels = {};
 const FRIENDLY_NAMES = {
@@ -10,6 +11,7 @@ const FRIENDLY_NAMES = {
 };
 
 function init() {
+  const renderers = document.querySelector("#renderers");
   labels.channels = document.querySelector("#label-channels");
   labels.period = document.querySelector("#label-period");
   labels.samples = document.querySelector("#label-samples");
@@ -18,8 +20,17 @@ function init() {
   labels.lastEventDuration = document.querySelector("#last-event-duration");
   labels.chartHeader = document.querySelector("#chart-header");
 
-  updateTotalSamples();
   labels.chartHeader.innerHTML = graphs.renderer;
+  RENDERERS.forEach((renderer) => {
+    const link = document.createElement("a");
+    link.href = "/" + renderer.toLowerCase();
+    link.innerHTML = renderer;
+    link.className = "button";
+    link.className += renderer === graphs.renderer ? " on" : "";
+    renderers.appendChild(link);
+  });
+
+  updateTotalSamples();
   graphs.initGraph(app.total.value / app.channels.value, app.samples.value);
   Object.keys(graphs.EVENTS).forEach((event) => {
     graphs.on(graphs.EVENTS[event], onGraphEvent);
