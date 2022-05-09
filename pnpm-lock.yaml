@@ -1,6 +1,7 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@arction/lcjs': ~3.4.0
   '@rollup/plugin-replace': ~4.0.0
   cross-env: ^7.0.3
   echarts: ~5.3.1
@@ -14,6 +15,7 @@ specifiers:
   workerpool: ~6.2.0
 
 dependencies:
+  '@arction/lcjs': 3.4.0
   echarts: 5.3.2
   sanitize.css: 13.0.0
   workerpool: 6.2.0
@@ -29,6 +31,18 @@ devDependencies:
   vite-plugin-handlebars: 1.6.0
 
 packages:
+
+  /@arction/eventer/1.0.1:
+    resolution: {integrity: sha512-/443gMPcZwt+BSH5cy2/sJlYis2zT0IUbllboi/e0Ye4uk58SUloxjMecWjp2sJ7IBCGGpduaE8I73mMQmJGvw==}
+    dev: false
+
+  /@arction/lcjs/3.4.0:
+    resolution: {integrity: sha512-L1HVSjcF8wr1SVvSMrNnzBe4kPpupOKXcMIjRv/vE6y/WPyBmVrwXTF/H7KwFRPQZ+xPHQvwFgbN/ktueha3TQ==}
+    dependencies:
+      '@arction/eventer': 1.0.1
+      earcut: 2.2.3
+      immutable: 4.0.0
+    dev: false
 
   /@jsbits/escape-regex-str/1.0.3:
     resolution: {integrity: sha512-0800vYI2fg1nuUq/T9Tqv8DMOLLNiRAltxFbKIbR7szrvW6qTuI2+zGK51hV7NAAmUr4G83Kvpj2R6Yyg07iIw==}
@@ -167,6 +181,10 @@ packages:
     dependencies:
       path-type: 4.0.0
     dev: true
+
+  /earcut/2.2.3:
+    resolution: {integrity: sha512-iRDI1QeCQIhMCZk48DRDMVgQSSBDmbzzNhnxIo+pwx3swkfjMh6vh0nWLq1NdvGHLKH6wIrAM3vQWeTj6qeoug==}
+    dev: false
 
   /echarts/5.3.2:
     resolution: {integrity: sha512-LWCt7ohOKdJqyiBJ0OGBmE9szLdfA9sGcsMEi+GGoc6+Xo75C+BkcT/6NNGRHAWtnQl2fNow05AQjznpap28TQ==}
@@ -500,6 +518,10 @@ packages:
     resolution: {integrity: sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==}
     engines: {node: '>= 4'}
     dev: true
+
+  /immutable/4.0.0:
+    resolution: {integrity: sha512-zIE9hX70qew5qTUjSS7wi1iwj/l7+m54KWU247nhM3v806UdGj1yDndXj+IOYxxtW9zyLI+xqFNZjTuDaLUqFw==}
+    dev: false
 
   /inflight/1.0.6:
     resolution: {integrity: sha1-Sb1jMdfQLQwJvJEKEHW6gWW1bfk=}

@@ -1,2 +1,0 @@
-export { generateDataSeries };
-export { setTotalSamples };
