@@ -22,6 +22,7 @@
     "vite-plugin-handlebars": "~1.6.0"
   },
   "dependencies": {
+    "@arction/lcjs": "~3.4.0",
     "echarts": "~5.3.1",
     "sanitize.css": "~13.0.0",
     "workerpool": "~6.2.0"
