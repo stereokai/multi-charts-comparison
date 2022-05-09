@@ -48,7 +48,8 @@ function onTotalSamplesChange(samplesPerChannel, samplesPerSecond) {
 }
 
 function generateTimeseries(totalSamples, samplesPerSecond) {
-  const baseDate = new Date();
+  // const baseDate = new Date();
+  const baseDate = new Date(0);
   baseDate.setDate(baseDate.getDate() - 1);
   const timestamp = baseDate.setHours(22);
 
