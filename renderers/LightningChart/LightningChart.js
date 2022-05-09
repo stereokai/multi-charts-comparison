@@ -10,6 +10,7 @@ import {
 let chart, series, xAxis;
 const DEFAULT_X_RANGE_MS = 30 * 1000;
 let signals;
+let isLoaded = false;
 export function on() {}
 
 export function init() {
@@ -83,6 +84,8 @@ export function init() {
 }
 
 export function update(dataset, timeSeries) {
+  if (isLoaded) return;
+  isLoaded = true;
   signals.forEach((signal, i) => {
     // if (i < 5) return;
     // console.log("adding", dataset[i]);
