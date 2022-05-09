@@ -97,11 +97,24 @@ export default defineConfig({
     alias: [...aliasesForVite],
   },
   build: {
+    target: "esnext",
     rollupOptions: {
       output: {
-        manualChunks: {
-          workerpool: ["workerpool"],
-          echarts: ["echarts"],
+        manualChunks(id) {
+          id = id.replace(__dirname, "").toLowerCase();
+
+          if (id.includes("workerpool")) {
+            return "workerpool";
+          }
+          if (id.includes("echarts@") || id.includes("zrender@")) {
+            return "echarts";
+          }
+          if (id.includes("echarts")) {
+            return "echarts.renderer";
+          }
+          if (id.includes("node_modules")) {
+            return "vendor";
+          }
         },
       },
     },
