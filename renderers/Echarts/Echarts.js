@@ -9,7 +9,10 @@ let chart;
 
 export { on } from "./echartsEvents.js";
 
+let hasInitialized = false;
+
 export function init() {
+  graphEvents.onBeforeDataUpdate();
   chart = echarts.init(document.querySelector("#chart"));
 
   Object.entries(ECHARTS_EVENT_HANDLERS).forEach(([event, handler]) => {
@@ -25,7 +28,12 @@ export function init() {
 }
 
 export function update(dataset, timeSeries) {
-  graphEvents.onBeforeDataUpdate();
+  if (hasInitialized) {
+    graphEvents.onBeforeDataUpdate();
+  } else {
+    hasInitialized = true;
+  }
+
   if (dataset) {
     dataset = buildModel(dataset, timeSeries);
   }
