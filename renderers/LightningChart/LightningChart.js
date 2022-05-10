@@ -1,3 +1,4 @@
+import GRAPH_EVENTS, { graphEventsFactory } from "@/Graphs/graphEvents.js";
 import { channels } from "@/models/state.js";
 import {
   AxisTickStrategies,
@@ -10,10 +11,18 @@ import {
 let chart, series, xAxis;
 const DEFAULT_X_RANGE_MS = 30 * 1000;
 let graphs;
-let isLoaded = false;
-export function on() {}
+
+export const graphEvents = graphEventsFactory();
+let lastEvent = null;
+let hasInitialized = false;
+export function on(...args) {
+  graphEvents.on(...args);
+}
 
 export function init() {
+  lastEvent = {
+    timestamp: performance.now(),
+  };
   const dashboard = lightningChart()
     .Dashboard({
       container: document.querySelector("#chart"),
@@ -40,6 +49,12 @@ export function init() {
 }
 
 export function update(dataset, timeSeries) {
+  if (hasInitialized) {
+    lastEvent = {
+      timestamp: performance.now(),
+    };
+  }
+
   graphs.forEach((signal, i) => {
     // if (i < 5) return;
     // console.log("adding", dataset[i]);
@@ -65,6 +80,23 @@ export function update(dataset, timeSeries) {
     false,
     true
   );
+
+  requestAnimationFrame(() => {
+    const duration = (performance.now() - lastEvent.timestamp) / 1000;
+    if (!hasInitialized) {
+      hasInitialized = true;
+      graphEvents.init({
+        duration,
+        type: GRAPH_EVENTS.init,
+      });
+    } else {
+      graphEvents.render({
+        duration,
+        type: GRAPH_EVENTS.render,
+      });
+    }
+    lastEvent = null;
+  });
 }
 
 export function buildModel(channelsDataArray, timeSeries) {}
