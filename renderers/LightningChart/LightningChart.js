@@ -11,6 +11,7 @@ import {
 let chart, series, xAxis;
 const DEFAULT_X_RANGE_MS = 30 * 1000;
 let graphs;
+let minX, maxX;
 
 export const graphEvents = graphEventsFactory();
 let lastEvent = null;
@@ -36,7 +37,12 @@ export function init() {
     return addChannel(dashboard, channel, i);
   });
 
-  graphs[graphs.length - 1].xAxis.onScaleChange(() => {
+  graphs[graphs.length - 1].xAxis.onScaleChange((start, end) => {
+    if (start < minX || end > maxX) {
+      requestAnimationFrame(() => {
+        graphs[graphs.length - 1].xAxis.setInterval(minX, maxX, false, true);
+      });
+    }
     graphs.forEach((graph, i) => {
       graph.yAxis.setInterval(channels[i].min, channels[i].max);
     });
@@ -79,12 +85,11 @@ export function update(datasets, timeSeries) {
     // .setMajorTickStyle((major) => major.setGridStrokeStyle(emptyLine))
     // .setMinorTickStyle((minor) => minor.setGridStrokeStyle(emptyLine))
   );
-  xAxis.setInterval(
-    timeSeries[0],
-    timeSeries[timeSeries.length - 1],
-    false,
-    true
-  );
+  if (timeSeries) {
+    minX = timeSeries[0];
+    maxX = timeSeries[timeSeries.length - 1];
+  }
+  xAxis.setInterval(minX, maxX, false, true);
 
   requestAnimationFrame(() => {
     const duration = (performance.now() - lastEvent.timestamp) / 1000;
