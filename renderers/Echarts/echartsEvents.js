@@ -1,4 +1,4 @@
-import GRAPH_EVENTS from "@/Graphs/graphEvents.js";
+import GRAPH_EVENTS, { graphEventsFactory } from "@/Graphs/graphEvents.js";
 import { debounce, throttle } from "@/utils.js";
 
 export const ECHARTS_EVENTS = {
@@ -8,11 +8,7 @@ export const ECHARTS_EVENTS = {
   finished: "finished",
 };
 
-function noop() {}
-export const eventHandlers = Object.keys(GRAPH_EVENTS).reduce((acc, key) => {
-  acc[GRAPH_EVENTS[key]] = noop;
-  return acc;
-}, {});
+export const graphEvents = graphEventsFactory();
 
 export function on(...args) {
   if (!(args[0] in GRAPH_EVENTS) && !(args[0] in ECHARTS_EVENTS)) {
@@ -25,18 +21,11 @@ export function on(...args) {
   }
 
   switch (args[0]) {
-    case GRAPH_EVENTS.init:
-      eventHandlers[GRAPH_EVENTS.init] = args[1];
-      return;
-    case GRAPH_EVENTS.render:
-      eventHandlers[GRAPH_EVENTS.render] = args[1];
-      return;
-    case GRAPH_EVENTS.zoomPan:
-      eventHandlers[GRAPH_EVENTS.zoomPan] = args[1];
-      return;
     case ECHARTS_EVENTS.onBeforeDataUpdate:
-      eventHandlers[ECHARTS_EVENTS.onBeforeDataUpdate] = args[1];
+      graphEvents[ECHARTS_EVENTS.onBeforeDataUpdate] = args[1];
       return;
+    default:
+      graphEvents.on(...args);
   }
 }
 
@@ -57,20 +46,20 @@ const finishHandler = debounce(() => {
     if (lastEvent.type === ECHARTS_EVENTS.onBeforeDataUpdate) {
       if (!hasInitialized) {
         hasInitialized = true;
-        eventHandlers.init({
+        graphEvents.init({
           duration,
           type: GRAPH_EVENTS.init,
         });
       } else {
-        eventHandlers.render({
+        graphEvents.render({
           duration,
           type: GRAPH_EVENTS.render,
         });
       }
     }
 
-    if (eventHandlers[lastEvent.type]) {
-      eventHandlers[lastEvent.type]({
+    if (graphEvents[lastEvent.type]) {
+      graphEvents[lastEvent.type]({
         duration,
         type: lastEvent.type,
       });

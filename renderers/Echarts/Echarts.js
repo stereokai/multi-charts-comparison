@@ -2,7 +2,7 @@ import { channels } from "@/models/state.js";
 import { throttle } from "@/utils.js";
 import * as echarts from "echarts";
 import { defaults } from "./echartsDefaults";
-import { ECHARTS_EVENT_HANDLERS, eventHandlers, on } from "./echartsEvents.js";
+import { ECHARTS_EVENT_HANDLERS, graphEvents, on } from "./echartsEvents.js";
 import { buildEchartsOptions } from "./echartsOptionsBuilder.js";
 
 let chart;
@@ -25,7 +25,7 @@ export function init() {
 }
 
 export function update(dataset, timeSeries) {
-  eventHandlers.onBeforeDataUpdate();
+  graphEvents.onBeforeDataUpdate();
   if (dataset) {
     dataset = buildModel(dataset, timeSeries);
   }
