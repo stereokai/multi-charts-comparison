@@ -87,6 +87,12 @@ export function update(dataset = [], timeSeries) {
     channels[channelIndex].max = channelData.max;
   });
 
+  graphs
+    .splice(channels.length, graphs.length - channels.length)
+    .forEach((graph) => {
+      graph.chart.dispose();
+    });
+
   if (timeSeries) updateTimeSeries(timeSeries);
   updateDashboardRowHeights();
   getMainXAxis().setInterval(minX, maxX, false, true);
