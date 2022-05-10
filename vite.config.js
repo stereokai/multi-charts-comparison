@@ -109,8 +109,14 @@ export default defineConfig({
           if (id.includes("echarts@") || id.includes("zrender@")) {
             return "echarts";
           }
+          // if (id.includes("@arction")) {
+          //   return "lcjs";
+          // }
           if (id.includes("echarts")) {
             return "echarts.renderer";
+          }
+          if (id.includes("lightningchart")) {
+            return "lightningchart.renderer";
           }
           if (id.includes("node_modules")) {
             return "vendor";
