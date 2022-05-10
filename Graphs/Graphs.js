@@ -5,6 +5,7 @@ import {
   removeChannels,
 } from "@/models/state.js";
 import { renderer } from "@/router.js";
+import { getBaseDate } from "./graphCommon";
 export { default as EVENTS } from "./graphEvents.js";
 export { renderer };
 
@@ -44,21 +45,24 @@ function onTotalSamplesChange(samplesPerChannel, samplesPerSecond) {
   prevSamplesPerChannel = samplesPerChannel;
   prevSamplesPerSecond = samplesPerSecond;
 
-  timeSeries = generateTimeseries(samplesPerChannel, samplesPerSecond);
+  timeSeries = generateTimeseries(
+    samplesPerChannel,
+    samplesPerSecond,
+    chart.baseDate
+  );
 }
 
-function generateTimeseries(totalSamples, samplesPerSecond) {
-  // const baseDate = new Date();
-  const baseDate = new Date(0);
-  baseDate.setDate(baseDate.getDate() - 1);
-  const timestamp = baseDate.setHours(22);
-
+function generateTimeseries(
+  totalSamples,
+  samplesPerSecond,
+  firstTimestamp = getBaseDate()
+) {
   const samplesPerTimestampInSeconds = 1 / samplesPerSecond;
   const samplesPerTimestampInMilliseconds = samplesPerTimestampInSeconds * 1000;
 
   const timestamps = new Array(totalSamples);
   for (let i = 0; i < totalSamples; i++) {
-    timestamps[i] = timestamp + i * samplesPerTimestampInMilliseconds;
+    timestamps[i] = firstTimestamp + i * samplesPerTimestampInMilliseconds;
   }
   return timestamps;
 }
