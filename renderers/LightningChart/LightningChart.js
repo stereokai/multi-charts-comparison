@@ -94,6 +94,8 @@ export function update(dataset = [], timeSeries) {
     });
 
   if (timeSeries) updateTimeSeries(timeSeries);
+  // Synchronize zoom and scroll on all channels
+  synchronizeAxisIntervals(...graphs.map((ch) => ch.xAxis));
   updateDashboardRowHeights();
   getMainXAxis().setInterval(minX, maxX, false, true);
   reportRenderEvent();
@@ -163,7 +165,7 @@ function addChannel(dashboard, channel, channelIndex) {
 }
 
 function registerZoomEvents(container) {
-  graphs[graphs.length - 1].xAxis.onScaleChange((start, end) => {
+  graphs[0].xAxis.onScaleChange((start, end) => {
     // Prevent zomming out more than full graph width
     if (start < minX || end > maxX) {
       requestAnimationFrame(() => {
@@ -184,9 +186,6 @@ function registerZoomEvents(container) {
       graph.yAxis.setInterval(channels[i].min, channels[i].max);
     });
   });
-
-  // Synchronize zoom and scroll on all channels
-  synchronizeAxisIntervals(...graphs.map((ch) => ch.xAxis));
 
   // Prevent native wheel zoom (interferes with max zoom limitation)
   container.addEventListener(
