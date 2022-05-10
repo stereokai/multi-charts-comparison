@@ -48,20 +48,25 @@ export function init() {
   window.dashboard = dashboard;
 }
 
-export function update(dataset, timeSeries) {
+export function update(datasets, timeSeries) {
   if (hasInitialized) {
     lastEvent = {
       timestamp: performance.now(),
     };
   }
 
-  graphs.forEach((signal, i) => {
-    // if (i < 5) return;
-    // console.log("adding", dataset[i]);
-    console.log(dataset[i].length, timeSeries.length);
-    signal.series.clear();
-    signal.series.addArraysXY(timeSeries, dataset[i]);
-    // signal.series.addArrayY(dataset[i]);
+  datasets.forEach((dataset, i) => {
+    let graph = graphs[i];
+
+    if (datasets.length < graphs.length) {
+      return; // TODO: ask lcjs how to add/remove rows to dashboard
+      const channelIndex = graphs.length + i;
+      graphs.push(addChannel(dashboard, channels[channelIndex], channelIndex));
+      graph = graphs[channelIndex];
+    }
+
+    graph.series.clear();
+    graph.series.addArraysXY(timeSeries, dataset);
   });
 
   const channelBottom = graphs[graphs.length - 1];
