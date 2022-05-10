@@ -169,7 +169,11 @@ function addChannel(dashboard, channel, channelIndex) {
   // });
 
   const series = chart.addLineSeries({
-    dataPattern: { pattern: "ProgressiveX" },
+    dataPattern: {
+      pattern: "ProgressiveX",
+      regularProgressiveStep: true,
+      allowDataGrouping: true,
+    },
     automaticColorIndex: channelIndex,
   });
   // .setName(`Channel ${iSignal + 1}`)
