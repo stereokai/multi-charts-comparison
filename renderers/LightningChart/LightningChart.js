@@ -27,6 +27,12 @@ export function init() {
     return addChannel(dashboard, channel, i);
   });
 
+  graphs[graphs.length - 1].xAxis.onScaleChange(() => {
+    graphs.forEach((graph, i) => {
+      graph.yAxis.setInterval(channels[i].min, channels[i].max);
+    });
+  });
+
   synchronizeAxisIntervals(...graphs.map((ch) => ch.xAxis));
 
   window.graphs = graphs;
@@ -59,17 +65,6 @@ export function update(dataset, timeSeries) {
     false,
     true
   );
-  xAxis.onScaleChange(() => {
-    graphs.forEach((signal, i) => {
-      signal.yAxis.setInterval(channels[i].min, channels[i].max);
-    });
-  });
-  // xAxis.setInterval(
-  //     graphs[9].series.getXMin(),
-  //     graphs[9].series.getXMax(),
-  //     false,
-  //     true
-  //   );
 }
 
 export function buildModel(channelsDataArray, timeSeries) {}
