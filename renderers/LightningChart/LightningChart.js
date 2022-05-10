@@ -47,7 +47,7 @@ export function init(container) {
       container,
       numberOfColumns: 1,
       numberOfRows: maxCellsCount,
-      theme: Themes.light,
+      theme: Themes.lightNew,
     })
     .setSplitterStyle(emptyLine)
     .setSplitterStyleHighlight(emptyLine);
@@ -150,14 +150,16 @@ function addChannel(dashboard, channel, channelIndex) {
     .setThickness(60)
     .setAnimationZoom(undefined);
 
-  const series = chart.addLineSeries({
-    dataPattern: {
-      pattern: "ProgressiveX",
-      regularProgressiveStep: true,
-      allowDataGrouping: true,
-    },
-    automaticColorIndex: channelIndex,
-  });
+  const series = chart
+    .addLineSeries({
+      dataPattern: {
+        pattern: "ProgressiveX",
+        regularProgressiveStep: true,
+        allowDataGrouping: true,
+      },
+      automaticColorIndex: channelIndex,
+    })
+    .setStrokeStyle((solidLine) => solidLine.setThickness(-1));
 
   // updateDashboardRowHeights();
 
