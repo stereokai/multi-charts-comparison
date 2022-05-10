@@ -9,7 +9,8 @@ import {
   Themes,
 } from "@arction/lcjs";
 
-let graphs;
+let graphs = [],
+  dashboard;
 let minX, maxX;
 export const baseDate = 0;
 const getMainXAxis = () => {
@@ -23,20 +24,33 @@ export const graphEvents = graphEventsFactory();
 export function on(...args) {
   graphEvents.on(...args);
 }
+const maxCellsCount = 25;
+const updateDashboardRowHeights = () => {
+  for (let row = 0; row < maxCellsCount; row += 1) {
+    if (row < graphs.length) {
+      dashboard.setRowHeight(row, 1);
+    } else {
+      dashboard.setRowHeight(row, 0.00001);
+    }
+  }
+
+  dashboard.setRowHeight(graphs[graphs.length - 1].row, 2);
+};
 
 export function init(container) {
   lastEvent = {
     timestamp: performance.now(),
   };
 
-  const dashboard = lightningChart()
+  dashboard = lightningChart()
     .Dashboard({
       container,
       numberOfColumns: 1,
-      numberOfRows: channels.length,
+      numberOfRows: maxCellsCount,
       theme: Themes.light,
     })
-    .setSplitterStyle(emptyLine);
+    .setSplitterStyle(emptyLine)
+    .setSplitterStyleHighlight(emptyLine);
 
   graphs = channels.map((channel, i) => {
     return addChannel(dashboard, channel, i);
@@ -52,13 +66,16 @@ export function update(dataset = [], timeSeries) {
     };
   }
 
+  const currGraphsLength = graphs.length;
+
   dataset.forEach((channelData, i) => {
     let graph = graphs[i];
+    let channelIndex = i;
 
     // Add new channels
-    if (dataset.length < graphs.length) {
-      return; // TODO: ask lcjs how to add/remove rows to dashboard
-      const channelIndex = graphs.length + i;
+    if (dataset.length < currGraphsLength) {
+      // return; // TODO: ask lcjs how to add/remove rows to dashboard
+      channelIndex = currGraphsLength + i;
       graphs.push(addChannel(dashboard, channels[channelIndex], channelIndex));
       graph = graphs[channelIndex];
     }
@@ -66,16 +83,23 @@ export function update(dataset = [], timeSeries) {
     // Update existing channels
     graph.series.clear();
     graph.series.addArraysXY(timeSeries, channelData.data);
-    channels[i].min = channelData.min;
-    channels[i].max = channelData.max;
+    channels[channelIndex].min = channelData.min;
+    channels[channelIndex].max = channelData.max;
   });
 
   if (timeSeries) updateTimeSeries(timeSeries);
+  updateDashboardRowHeights();
   getMainXAxis().setInterval(minX, maxX, false, true);
   reportRenderEvent();
+
+  window.dashboard = dashboard;
+  window.graphs = graphs;
 }
 
 function updateTimeSeries(timeSeries) {
+  graphs.forEach((graph, i) => {
+    graph.xAxis.setTickStrategy(AxisTickStrategies.Empty);
+  });
   getMainXAxis().setTickStrategy(
     AxisTickStrategies.DateTime,
     (ticks) => ticks.setDateOrigin(new Date(getBaseDate()))
@@ -127,7 +151,9 @@ function addChannel(dashboard, channel, channelIndex) {
     automaticColorIndex: channelIndex,
   });
 
-  return { chart, series, xAxis, yAxis };
+  // updateDashboardRowHeights();
+
+  return { chart, series, xAxis, yAxis, row: channelIndex };
 }
 
 function registerZoomEvents(container) {
