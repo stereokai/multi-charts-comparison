@@ -78,5 +78,5 @@ function generateDataSeries(
     iteration++;
   }
 
-  return data;
+  return { data, min, max };
 }

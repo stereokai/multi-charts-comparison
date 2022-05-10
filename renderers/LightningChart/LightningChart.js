@@ -71,17 +71,17 @@ export function init(container) {
   );
 }
 
-export function update(datasets, timeSeries) {
+export function update(dataset, timeSeries) {
   if (hasInitialized) {
     lastEvent = {
       timestamp: performance.now(),
     };
   }
 
-  datasets.forEach((dataset, i) => {
+  dataset.forEach((channelData, i) => {
     let graph = graphs[i];
 
-    if (datasets.length < graphs.length) {
+    if (dataset.length < graphs.length) {
       return; // TODO: ask lcjs how to add/remove rows to dashboard
       const channelIndex = graphs.length + i;
       graphs.push(addChannel(dashboard, channels[channelIndex], channelIndex));
@@ -89,7 +89,9 @@ export function update(datasets, timeSeries) {
     }
 
     graph.series.clear();
-    graph.series.addArraysXY(timeSeries, dataset);
+    graph.series.addArraysXY(timeSeries, channelData.data);
+    channels[i].min = channelData.min;
+    channels[i].max = channelData.max;
   });
 
   const channelBottom = graphs[graphs.length - 1];

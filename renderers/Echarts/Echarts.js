@@ -44,20 +44,21 @@ export function update(dataset, timeSeries) {
   });
 }
 
-export function buildModel(channelsDataArray, timeSeries) {
-  const dataset = {};
+export function buildModel(incomingDataset, timeSeries) {
+  const outgoingDataset = {};
 
-  for (let i = 0; i < channelsDataArray.length; i++) {
-    const channelNumber = channels.length - channelsDataArray.length + i;
+  for (let i = 0; i < incomingDataset.length; i++) {
+    const channelNumber = channels.length - incomingDataset.length + i;
+    const channel = incomingDataset[i];
 
-    dataset[`channel_${channelNumber}`] = channelsDataArray[i];
+    outgoingDataset[`channel_${channelNumber}`] = channel.data;
   }
 
-  if (channelsDataArray.length === channels.length) {
-    dataset.timestamp = timeSeries;
+  if (incomingDataset.length === channels.length) {
+    outgoingDataset.timestamp = timeSeries;
   }
 
-  return dataset;
+  return outgoingDataset;
 }
 
 export function showLoading() {
