@@ -20,13 +20,13 @@ export function on(...args) {
   graphEvents.on(...args);
 }
 
-export function init() {
+export function init(container) {
   lastEvent = {
     timestamp: performance.now(),
   };
   const dashboard = lightningChart()
     .Dashboard({
-      container: document.querySelector("#chart"),
+      container,
       numberOfColumns: 1,
       numberOfRows: channels.length,
       theme: Themes.light,
@@ -40,7 +40,15 @@ export function init() {
   graphs[graphs.length - 1].xAxis.onScaleChange((start, end) => {
     if (start < minX || end > maxX) {
       requestAnimationFrame(() => {
+        graphs.forEach((graph) =>
+          graph.chart.setMouseInteractionWheelZoom(false)
+        );
         graphs[graphs.length - 1].xAxis.setInterval(minX, maxX, false, true);
+        setTimeout(() => {
+          graphs.forEach((graph) =>
+            graph.chart.setMouseInteractionWheelZoom(true)
+          );
+        }, 1000);
       });
     }
     graphs.forEach((graph, i) => {
@@ -52,6 +60,15 @@ export function init() {
 
   window.graphs = graphs;
   window.dashboard = dashboard;
+  container.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+    },
+    {
+      passive: false,
+    }
+  );
 }
 
 export function update(datasets, timeSeries) {

@@ -31,7 +31,11 @@ function init() {
   });
 
   updateTotalSamples();
-  graphs.initGraph(app.total.value / app.channels.value, app.samples.value);
+  graphs.initGraph(
+    document.querySelector("#chart"),
+    app.total.value / app.channels.value,
+    app.samples.value
+  );
   Object.keys(graphs.EVENTS).forEach((event) => {
     graphs.on(graphs.EVENTS[event], onGraphEvent);
   });

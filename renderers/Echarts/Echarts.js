@@ -11,9 +11,9 @@ export { on } from "./echartsEvents.js";
 
 let hasInitialized = false;
 
-export function init() {
+export function init(container) {
   graphEvents.onBeforeDataUpdate();
-  chart = echarts.init(document.querySelector("#chart"));
+  chart = echarts.init(container);
 
   Object.entries(ECHARTS_EVENT_HANDLERS).forEach(([event, handler]) => {
     on(chart, event, handler);

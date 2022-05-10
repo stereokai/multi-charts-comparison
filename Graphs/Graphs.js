@@ -18,9 +18,9 @@ export function on(...args) {
   chart.on(...args);
 }
 
-export function initGraph(samplesPerChannel, samplesPerSecond) {
+export function initGraph(container, samplesPerChannel, samplesPerSecond) {
   onTotalSamplesChange(samplesPerChannel, samplesPerSecond);
-  chart.init();
+  chart.init(container);
   setChartData(() => regenerateAllChannels(samplesPerChannel));
 }
 
