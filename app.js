@@ -85,7 +85,7 @@ function onGraphEvent(graphEvent) {
   labels.lastEvent.innerHTML = FRIENDLY_NAMES[graphEvent.type];
   labels.lastEventDuration.innerHTML = graphEvent.duration.toFixed(2) + "s";
 }
-if (document.readyState == "complete") {
+if (document.readyState == "complete" || document.readyState == "interactive") {
   init();
 } else {
   document.addEventListener("DOMContentLoaded", () => {
