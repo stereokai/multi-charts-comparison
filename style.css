@@ -21,6 +21,7 @@ body {
   text-align: center;
   border: none;
   padding-left: 1rem;
+  row-gap: 1rem;
 }
 
 #chart-header {
@@ -37,12 +38,13 @@ body {
 }
 
 .toolbar-item {
-  margin: 1rem auto;
+  margin: 0 auto;
 }
 
 .toolbar-item.slider {
   display: flex;
   flex-direction: column;
+  margin: 0.5rem auto;
 }
 
 .toolbar-item > label,
