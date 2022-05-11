@@ -73,8 +73,7 @@ export function update(dataset = [], timeSeries) {
     let channelIndex = i;
 
     // Add new channels
-    if (dataset.length < currGraphsLength) {
-      // return; // TODO: ask lcjs how to add/remove rows to dashboard
+    if (channels.length !== currGraphsLength) {
       channelIndex = currGraphsLength + i;
       graphs.push(addChannel(dashboard, channels[channelIndex], channelIndex));
       graph = graphs[channelIndex];
