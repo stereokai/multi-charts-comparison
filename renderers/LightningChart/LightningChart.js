@@ -4,8 +4,12 @@ import { channels } from "@/models/state.js";
 import { default as app } from "@/models/ui.js";
 import {
   AxisTickStrategies,
+  ColorCSS,
+  ColorHEX,
   emptyLine,
+  FontSettings,
   lightningChart,
+  SolidFill,
   synchronizeAxisIntervals,
   Themes,
 } from "@arction/lcjs";
@@ -57,6 +61,11 @@ export function init(container) {
       numberOfRows: app.channels.max,
       theme: Themes.lightNew,
     })
+    .setBackgroundFillStyle(
+      new SolidFill({
+        color: ColorCSS("white"),
+      })
+    )
     .setSplitterStyle(emptyLine)
     .setSplitterStyleHighlight(emptyLine);
 
@@ -118,11 +127,11 @@ function updateTimeSeries(timeSeries) {
   graphs.forEach((graph, i) => {
     graph.xAxis.setTickStrategy(AxisTickStrategies.Empty);
   });
-  getBottomGraph().xAxis.setTickStrategy(
-    AxisTickStrategies.DateTime,
-    (ticks) => ticks.setDateOrigin(new Date(getBaseDate()))
-    // .setMajorTickStyle((major) => major.setGridStrokeStyle(emptyLine))
-    // .setMinorTickStyle((minor) => minor.setGridStrokeStyle(emptyLine))
+  getBottomGraph().xAxis.setTickStrategy(AxisTickStrategies.DateTime, (ticks) =>
+    ticks
+      .setDateOrigin(new Date(getBaseDate()))
+      .setMajorTickStyle((major) => major.setGridStrokeStyle(emptyLine))
+      .setMinorTickStyle((minor) => minor.setGridStrokeStyle(emptyLine))
   );
 
   if (timeSeries) {
@@ -141,24 +150,38 @@ function addChannel(dashboard, channel, channelIndex) {
       disableAnimations: true,
     })
     .setTitle("")
-    .setPadding({ top: 0, bottom: 0 })
-    .setBackgroundStrokeStyle(emptyLine);
+    .setPadding({ left: 100, top: 0, bottom: 0 })
+    .setBackgroundStrokeStyle(emptyLine)
+    .setSeriesBackgroundFillStyle(
+      new SolidFill({
+        color: ColorCSS("white"),
+      })
+    );
 
   const xAxis = chart
     .getDefaultAxisX()
-    .setTickStrategy(AxisTickStrategies.Empty)
+    .setTickStrategy(AxisTickStrategies.Empty, (styler) => console.log(styler))
     .setStrokeStyle(emptyLine);
 
   const yAxis = chart
     .getDefaultAxisY()
     .setMouseInteractions(false)
     .setChartInteractions(false)
-    .setTickStrategy(AxisTickStrategies.Empty)
     .setStrokeStyle(emptyLine)
     .setTitle(channel.name)
+    .setTitleFont(new FontSettings({ size: 12 }))
+    .setTitleFillStyle(new SolidFill({ color: ColorHEX("#6e7079") }))
     .setTitleRotation(0)
     .setThickness(60)
-    .setAnimationZoom(undefined);
+    .setAnimationZoom(undefined)
+    .setTickStrategy(AxisTickStrategies.Numeric, (tickStrategy) =>
+      tickStrategy.setMajorTickStyle((visibleTicks) => {
+        return visibleTicks
+          .setLabelFillStyle(new SolidFill({ color: ColorHEX("#6e7079") }))
+          .setLabelFont(new FontSettings({ size: 8 }))
+          .setTickStyle(false);
+      })
+    );
 
   const series = chart
     .addLineSeries({
