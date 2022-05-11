@@ -23,7 +23,7 @@ function init() {
   labels.chartHeader.innerHTML = graphs.renderer;
   RENDERERS.forEach((renderer) => {
     const link = document.createElement("a");
-    link.href = "/" + renderer.toLowerCase();
+    link.href = "#" + renderer.toLowerCase();
     link.innerHTML = renderer;
     link.className = "button";
     link.className += renderer === graphs.renderer ? " on" : "";
