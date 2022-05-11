@@ -97,6 +97,7 @@ export default defineConfig({
     alias: [...aliasesForVite],
   },
   build: {
+    outDir: "docs",
     target: "esnext",
     rollupOptions: {
       output: {
