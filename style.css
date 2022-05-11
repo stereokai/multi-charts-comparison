@@ -141,3 +141,15 @@ body {
     content: "Generating data";
   }
 }
+
+.highlight-flash {
+  animation: higlight-flash 1s ease-in-out 0s;
+}
+@keyframes higlight-flash {
+  from {
+    background: #f96;
+  }
+  to {
+    background: transparent;
+  }
+}

@@ -97,6 +97,12 @@ function onGraphEvent(graphEvent) {
 
   labels.lastEvent.innerHTML = FRIENDLY_NAMES[graphEvent.type];
   labels.lastEventDuration.innerHTML = graphEvent.duration.toFixed(2) + "s";
+  requestAnimationFrame(() => {
+    labels.lastEventDuration.parentNode.classList.add("highlight-flash");
+    setTimeout(() => {
+      labels.lastEventDuration.parentNode.classList.remove("highlight-flash");
+    }, 1000);
+  });
 }
 if (document.readyState == "complete" || document.readyState == "interactive") {
   init();
