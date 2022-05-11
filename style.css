@@ -100,16 +100,19 @@ body {
 }
 
 #chart-header.show-loader::after {
-  content: "Generating data";
+  animation: dotty steps(1, end) 1s infinite;
+  content: "";
   position: absolute;
   font-size: 12px;
   font-weight: normal;
   line-height: 12px;
-  display: block;
+  display: inline-block;
   left: 50%;
-  width: 100px;
   transform: translateX(-50%);
   bottom: 0;
+  width: 90px;
+  text-align: left;
+  white-space: nowrap;
 }
 
 @keyframes spin {
@@ -118,5 +121,23 @@ body {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes dotty {
+  0% {
+    content: "Generating data";
+  }
+  25% {
+    content: "Generating data.";
+  }
+  50% {
+    content: "Generating data..";
+  }
+  75% {
+    content: "Generating data...";
+  }
+  100% {
+    content: "Generating data";
   }
 }
