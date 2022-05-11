@@ -7,7 +7,7 @@ import { buildEchartsOptions } from "./echartsOptionsBuilder.js";
 
 let chart;
 
-export { on } from "./echartsEvents.js";
+export { graphEvents, on } from "./echartsEvents.js";
 
 let hasInitialized = false;
 

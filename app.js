@@ -31,14 +31,14 @@ function init() {
   });
 
   updateTotalSamples();
+  Object.keys(graphs.EVENTS).forEach((event) => {
+    graphs.on(graphs.EVENTS[event], onGraphEvent);
+  });
   graphs.initGraph(
     document.querySelector("#chart"),
     app.total.value / app.channels.value,
     app.samples.value
   );
-  Object.keys(graphs.EVENTS).forEach((event) => {
-    graphs.on(graphs.EVENTS[event], onGraphEvent);
-  });
 
   const rangeChannels = document.querySelector("#range-channels");
   const rangePeriod = document.querySelector("#range-period");
@@ -85,6 +85,15 @@ function onGraphEvent(graphEvent) {
   console.log(
     `Last event was ${graphEvent.type} and took ${graphEvent.duration}`
   );
+
+  if (graphEvent.type === graphs.EVENTS.dataOperationStart) {
+    labels.chartHeader.classList.add("show-loader");
+    return;
+  }
+  if (graphEvent.type === graphs.EVENTS.dataOperationEnd) {
+    labels.chartHeader.classList.remove("show-loader");
+    return;
+  }
 
   labels.lastEvent.innerHTML = FRIENDLY_NAMES[graphEvent.type];
   labels.lastEventDuration.innerHTML = graphEvent.duration.toFixed(2) + "s";

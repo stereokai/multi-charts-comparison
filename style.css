@@ -24,6 +24,8 @@ body {
 }
 
 #chart-header {
+  display: inline-block;
+  position: relative;
   height: 60px;
   margin: 0;
   line-height: 60px;
@@ -79,4 +81,40 @@ body {
 #renderers > .button {
   display: inline-block;
   margin: 0.7rem;
+}
+
+#chart-header.show-loader::before {
+  content: "";
+  display: inline-block;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 0.5s linear infinite;
+  position: absolute;
+  top: 15px;
+  left: -36px;
+}
+
+#chart-header.show-loader::after {
+  content: "Generating data";
+  position: absolute;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 12px;
+  display: block;
+  left: 50%;
+  width: 100px;
+  transform: translateX(-50%);
+  bottom: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

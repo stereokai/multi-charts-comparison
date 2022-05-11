@@ -2,6 +2,8 @@ const GRAPH_EVENTS = {
   init: "init",
   render: "render",
   zoomPan: "zoomPan",
+  dataOperationStart: "dataOperationStart",
+  dataOperationEnd: "dataOperationEnd",
 };
 export default GRAPH_EVENTS;
 
@@ -19,5 +21,16 @@ export function graphEventsFactory() {
   };
 
   graphEvents.on = on;
+  graphEvents.dataOperationStarted = () => {
+    graphEvents.dataOperationStart({
+      type: GRAPH_EVENTS.dataOperationStart,
+    });
+  };
+  graphEvents.dataOperationEnded = () => {
+    graphEvents.dataOperationEnd({
+      type: GRAPH_EVENTS.dataOperationEnd,
+    });
+  };
+
   return graphEvents;
 }
