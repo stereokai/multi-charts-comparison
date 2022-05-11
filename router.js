@@ -2,11 +2,21 @@ export const RENDERERS = [
   //#RENDERERS
 ];
 
-let pathname = document.location.pathname.toLowerCase();
-pathname = pathname.substring(pathname.lastIndexOf("/") + 1);
-
+let hash = location.hash.substring(1).toLowerCase();
+console.log(hash);
 export const renderer = RENDERERS.find(
-  (renderer) => renderer.toLowerCase() === pathname
+  (renderer) => renderer.toLowerCase() === hash
 );
 
-if (!renderer) document.location.pathname = `/${RENDERERS[0].toLowerCase()}`;
+if (!renderer) {
+  location.hash = `${RENDERERS[0].toLowerCase()}`;
+  location.reload();
+} else {
+  window.addEventListener(
+    "hashchange",
+    () => {
+      location.reload();
+    },
+    false
+  );
+}
