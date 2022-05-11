@@ -54,7 +54,12 @@ export function init(container) {
     timestamp: performance.now(),
   };
 
-  dashboard = lightningChart()
+  dashboard = lightningChart({
+    overrideInteractionMouseButtons: {
+      chartXYPanMouseButton: 0, // LMB
+      chartXYRectangleZoomFitMouseButton: 2, // RMB
+    },
+  })
     .Dashboard({
       container,
       numberOfColumns: 1,
