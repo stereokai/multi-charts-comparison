@@ -1,6 +1,7 @@
 import { getBaseDate } from "@/Graphs/graphCommon";
 import GRAPH_EVENTS, { graphEventsFactory } from "@/Graphs/graphEvents.js";
 import { channels } from "@/models/state.js";
+import { default as app } from "@/models/ui.js";
 import {
   AxisTickStrategies,
   emptyLine,
@@ -12,9 +13,10 @@ import {
 let graphs = [],
   dashboard;
 let minX, maxX;
+let axisSyncHandle;
 export const baseDate = 0;
-const getMainXAxis = () => {
-  return graphs[graphs.length - 1].xAxis;
+const getBottomGraph = () => {
+  return graphs[graphs.length - 1];
 };
 
 // For events
@@ -24,17 +26,23 @@ export const graphEvents = graphEventsFactory();
 export function on(...args) {
   graphEvents.on(...args);
 }
-const maxCellsCount = 25;
+
 const updateDashboardRowHeights = () => {
-  for (let row = 0; row < maxCellsCount; row += 1) {
+  const axisHeight = getBottomGraph().xAxis.getHeight();
+  const rowHeight =
+    (dashboard.engine.container.clientHeight - axisHeight) / graphs.length;
+  for (let row = 0; row < app.channels.max; row++) {
     if (row < graphs.length) {
-      dashboard.setRowHeight(row, 1);
+      dashboard.setRowHeight(row, Math.round(rowHeight));
     } else {
       dashboard.setRowHeight(row, 0.00001);
     }
   }
 
-  dashboard.setRowHeight(graphs[graphs.length - 1].row, 2);
+  dashboard.setRowHeight(
+    getBottomGraph().row,
+    Math.round(rowHeight + axisHeight)
+  );
 };
 
 export function init(container) {
@@ -46,7 +54,7 @@ export function init(container) {
     .Dashboard({
       container,
       numberOfColumns: 1,
-      numberOfRows: maxCellsCount,
+      numberOfRows: app.channels.max,
       theme: Themes.lightNew,
     })
     .setSplitterStyle(emptyLine)
@@ -86,6 +94,7 @@ export function update(dataset = [], timeSeries) {
     channels[channelIndex].max = channelData.max;
   });
 
+  // Remove channels outside of dataset
   graphs
     .splice(channels.length, graphs.length - channels.length)
     .forEach((graph) => {
@@ -94,9 +103,11 @@ export function update(dataset = [], timeSeries) {
 
   if (timeSeries) updateTimeSeries(timeSeries);
   // Synchronize zoom and scroll on all channels
-  synchronizeAxisIntervals(...graphs.map((ch) => ch.xAxis));
-  updateDashboardRowHeights();
-  getMainXAxis().setInterval(minX, maxX, false, true);
+  axisSyncHandle && axisSyncHandle.remove();
+  axisSyncHandle = synchronizeAxisIntervals(...graphs.map((ch) => ch.xAxis));
+  getBottomGraph().xAxis.setInterval(minX, maxX, false, true);
+  requestAnimationFrame(updateDashboardRowHeights);
+
   reportRenderEvent();
 
   window.dashboard = dashboard;
@@ -107,7 +118,7 @@ function updateTimeSeries(timeSeries) {
   graphs.forEach((graph, i) => {
     graph.xAxis.setTickStrategy(AxisTickStrategies.Empty);
   });
-  getMainXAxis().setTickStrategy(
+  getBottomGraph().xAxis.setTickStrategy(
     AxisTickStrategies.DateTime,
     (ticks) => ticks.setDateOrigin(new Date(getBaseDate()))
     // .setMajorTickStyle((major) => major.setGridStrokeStyle(emptyLine))
@@ -160,8 +171,6 @@ function addChannel(dashboard, channel, channelIndex) {
     })
     .setStrokeStyle((solidLine) => solidLine.setThickness(-1));
 
-  // updateDashboardRowHeights();
-
   return { chart, series, xAxis, yAxis, row: channelIndex };
 }
 
@@ -173,7 +182,7 @@ function registerZoomEvents(container) {
         graphs.forEach((graph) =>
           graph.chart.setMouseInteractionWheelZoom(false)
         );
-        graphs[graphs.length - 1].xAxis.setInterval(minX, maxX, false, true);
+        getBottomGraph().xAxis.setInterval(minX, maxX, false, true);
         setTimeout(() => {
           graphs.forEach((graph) =>
             graph.chart.setMouseInteractionWheelZoom(true)
