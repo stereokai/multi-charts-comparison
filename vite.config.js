@@ -1,5 +1,6 @@
 import replace from "@rollup/plugin-replace";
 import { readdirSync, readFileSync, statSync } from "fs";
+import { createRequire } from "module";
 import { join, resolve } from "path";
 import copy from "rollup-plugin-copy-merge";
 import jscc from "rollup-plugin-jscc";
@@ -8,6 +9,8 @@ import dynamicImport from "vite-plugin-dynamic-import";
 import handlebars from "vite-plugin-handlebars";
 import { default as toolbarConfiguration } from "./models/ui.js";
 import { aliasesForVite } from "./pathbroker.mjs";
+const require = createRequire(import.meta.url);
+const packageJson = require("./package.json");
 
 function toPosixPath(address) {
   return address.replace(/\\/g, "/");
@@ -78,6 +81,7 @@ if (process.env.NODE_ENV === "development") {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: `/${packageJson.name}/`,
   plugins: [
     copy({
       hook: "buildStart",
