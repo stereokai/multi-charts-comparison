@@ -113,6 +113,9 @@ export function update(dataset = [], timeSeries) {
     .splice(channels.length, graphs.length - channels.length)
     .forEach((graph) => {
       graph.chart.dispose();
+      for (let key in graph) {
+        graph[key] = null;
+      }
     });
 
   if (timeSeries) updateTimeSeries(timeSeries);
