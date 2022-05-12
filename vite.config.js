@@ -1,4 +1,5 @@
 import replace from "@rollup/plugin-replace";
+import esbuild from "esbuild";
 import { readdirSync, readFileSync, statSync } from "fs";
 import { createRequire } from "module";
 import { join, resolve } from "path";
@@ -11,6 +12,8 @@ import { default as toolbarConfiguration } from "./models/ui.js";
 import { aliasesForVite } from "./pathbroker.mjs";
 const require = createRequire(import.meta.url);
 const packageJson = require("./package.json");
+
+const OUT_DIR = "docs";
 
 function toPosixPath(address) {
   return address.replace(/\\/g, "/");
@@ -101,9 +104,28 @@ export default defineConfig({
     alias: [...aliasesForVite],
   },
   build: {
-    outDir: "docs",
+    outDir: OUT_DIR,
     target: "esnext",
     rollupOptions: {
+      plugins: [
+        {
+          name: "minify-compiled-worker",
+          writeBundle: (opts, bundle) => {
+            // Get hashed filename
+            const CompiledWorker = Object.keys(bundle).find(
+              (fileName) => fileName.indexOf("CompiledWorker") > -1
+            );
+            esbuild.buildSync({
+              entryPoints: [`./${OUT_DIR}/${CompiledWorker}`],
+              bundle: false,
+              minify: true,
+              sourcemap: false,
+              allowOverwrite: true,
+              outfile: `./${OUT_DIR}/${CompiledWorker}`,
+            });
+          },
+        },
+      ],
       output: {
         manualChunks(id) {
           id = id.replace(__dirname, "").toLowerCase();
