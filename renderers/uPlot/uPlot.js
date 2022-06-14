@@ -1,8 +1,19 @@
 import GRAPH_EVENTS, { graphEventsFactory } from "@/Graphs/graphEvents.js";
 import { channels } from "@/models/state.js";
 import { debounce } from "@/utils.js";
+import Stats from "stats.js";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
+
+const stats = new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+const stats2 = new Stats();
+stats2.showPanel(2); // 0: fps, 1: ms, 2: mb, 3+: custom
+
+stats.dom.style.position = "static";
+stats.dom.style.position = "static";
+stats2.dom.style.display = "inline-block";
+stats2.dom.style.display = "inline-block";
 
 let container,
   uplots = [],
@@ -111,20 +122,27 @@ function wheelZoomPlugin(opts) {
           // let nyMax = nyMin + nyRange;
           // [nyMin, nyMax] = clamp(nyRange, nyMin, nyMax, yRange, yMin, yMax);
 
-          uplots.forEach((u) => {
-            u.batch(() => {
+          requestAnimationFrame(() => {
+            stats.begin();
+            uplots.forEach((u) => {
+              // u.batch(() => {
               u.setScale("x", {
                 min: nxMin,
                 max: nxMax,
               });
-
-              // u.setScale("y", {
-              //   min: nyMin,
-              //   max: nyMax,
-              // });
-
-              requestAnimationFrame(reportZoom);
+              reportZoom();
             });
+
+            stats.end();
+            // u.setScale("y", {
+            //   min: nyMin,
+            //   max: nyMax,
+            // });
+
+            // requestAnimationFrame(() => {
+
+            // });
+            // });
           });
         });
       },
@@ -155,6 +173,9 @@ export function init(_container) {
   lastEvent = {
     timestamp: performance.now(),
   };
+
+  document.getElementById("toolbar").appendChild(stats.dom);
+  document.getElementById("toolbar").appendChild(stats2.dom);
 
   container = _container;
   uPlotSync = uPlot.sync("key");
@@ -282,6 +303,7 @@ const reportRenderEvent = debounce(() => {
     return;
   }
   const duration = (performance.now() - lastEvent.timestamp) / 1000;
+  setTimeout(() => stats2.update(), 1000);
   if (!hasInitialized) {
     hasInitialized = true;
     graphEvents.init({
@@ -298,3 +320,24 @@ const reportRenderEvent = debounce(() => {
   // });
 }, 100);
 window.reportRenderEvent = reportRenderEvent;
+
+const shifted = {
+  values: (u, splits) =>
+    splits.map((v) =>
+      v % 10 == 0 ? "Core #" + (Math.floor(v / 10) + 1) : v % 10
+    ),
+  fillTo: (u, seriesIdx) => 10 * (seriesIdx - 1),
+  value: (u, v, seriesIdx) => v - 10 * (seriesIdx - 1),
+  data: (data) =>
+    data.map((vals, seriesIdx) =>
+      seriesIdx < 1 ? vals : vals.map((xVal) => xVal + 10 * (seriesIdx - 1))
+    ),
+  range: [0, 30],
+};
+
+let mode = shifted;
+
+const fillTo = (u, seriesIdx) => mode.fillTo(u, seriesIdx);
+const value = (u, v, seriesIdx) => mode.value(u, v, seriesIdx);
+const values = (u, splits) => mode.values(u, splits);
+const range = (u) => mode.range;

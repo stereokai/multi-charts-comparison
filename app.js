@@ -2,7 +2,6 @@ import * as graphs from "@/Graphs/Graphs.js";
 import { default as app } from "@/models/ui.js";
 import { RENDERERS } from "@/router.js";
 import { debounce } from "@/utils.js";
-import Stats from "stats.js";
 
 const labels = {};
 const FRIENDLY_NAMES = {
@@ -21,11 +20,6 @@ function init() {
   labels.lastEvent = document.querySelector("#last-event");
   labels.lastEventDuration = document.querySelector("#last-event-duration");
   labels.chartHeader = document.querySelector("#chart-header");
-
-  var stats = new Stats();
-  // stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
-  // window.stats = stats;
-  // document.body.appendChild(stats.dom);
 
   labels.chartHeader.innerHTML = graphs.renderer;
   RENDERERS.forEach((renderer) => {
