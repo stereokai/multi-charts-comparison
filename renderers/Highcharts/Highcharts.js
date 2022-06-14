@@ -3,8 +3,10 @@ import { graphEventsFactory } from "@/Graphs/graphEvents.js";
 // import { channels } from "@/models/state.js";
 // import { default as app } from "@/models/ui.js";
 import Highcharts from "highcharts/highstock";
-import Data from "highcharts/modules/data";
-Data(Highcharts);
+import Boost from "highcharts/modules/boost";
+Boost(Highcharts);
+
+let chart;
 
 export const graphEvents = graphEventsFactory();
 export function on(...args) {
@@ -36,12 +38,23 @@ export function update(dataset, timeSeries) {
       name: `${i}`,
       data: dataset[i].data,
       yAxis: i,
+      dataGrouping: {
+        enabled: false,
+      },
+      // boostThreshold: 1,
+      // turboThreshold: 1,
     };
   });
 
   console.log("update", dataset, timeSeries, yAxis, series);
 
-  Highcharts.stockChart("chart", {
+  chart = Highcharts.stockChart("chart", {
+    boost: {
+      seriesThreshold: 1,
+      // useGPUTranslations: true,
+      // usePreallocated: true,
+    },
+
     rangeSelector: {
       selected: 1,
     },
