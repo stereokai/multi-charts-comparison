@@ -56,7 +56,16 @@ export function update(dataset, timeSeries) {
   // Set main xaxis
   data[data.length - 1].xaxis = "x";
 
-  const layout = Object.assign({}, config.layout);
+  // Calculate layout
+  const layout = Object.assign(
+    {},
+    // Copy yaxis config to all subplots
+    new Array(channels.length - 1).fill(0).reduce((acc, _, i) => {
+      acc[`yaxis${i + 2}`] = config.layout.yaxis;
+      return acc;
+    }, {}),
+    config.layout
+  );
   layout.grid.rows = channels.length;
 
   if (!hasInitialized) {

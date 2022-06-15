@@ -14,9 +14,14 @@ export const layout = {
     // rows: channels.length,
     columns: 1,
   },
-  xaxis: { rangeslider: {} },
+  xaxis: {
+    rangeslider: {},
+  },
   yaxis: {
     fixedrange: true,
+    tickfont: {
+      size: 8,
+    },
   },
   showlegend: false,
   annotations: false,
