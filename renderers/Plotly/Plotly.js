@@ -1,6 +1,7 @@
 import GRAPH_EVENTS, { graphEventsFactory } from "@/Graphs/graphEvents.js";
 import { channels } from "@/models/state.js";
 import * as Plotly from "plotly.js-dist";
+import * as config from "./plotly.config.js";
 export const graphEvents = graphEventsFactory();
 export function on(...args) {
   graphEvents.on(...args);
@@ -24,107 +25,70 @@ export function update(dataset, timeSeries) {
       timestamp: performance.now(),
     };
   }
-  // buildModel(dataset, timeSeries);
-  timeSeries = timeSeries.map((timestamp) => new Date(timestamp));
+
   let data = (chart && chart.data) || [];
+
+  // Remove main xaxis in case we'll be adding new channels
   if (data.length > 0) data[data.length - 1].xaxis = "";
-  dataset &&
+
+  if (dataset) {
+    // Plotly doesn't accept unix timestamps, so we need to convert them to dates
+    timeSeries = timeSeries.map((timestamp) => new Date(timestamp));
+
+    // Create new traces for each channel
     dataset.forEach((channel, i, dataset) => {
       i = channels.length - dataset.length + i;
 
-      const trace = {
-        x: timeSeries,
-        y: channel.data,
-        yaxis: !i ? "y" : `y${i + 1}`,
-        type: "scattergl",
-        mode: "lines",
-        hoverinfo: "none",
-        line: {
-          shape: "spline",
-          smoothing: 0,
-          width: 1,
-          simplify: false,
+      data[i] = Object.assign(
+        {
+          x: timeSeries,
+          y: channel.data,
+          yaxis: !i ? "y" : `y${i + 1}`,
         },
-      };
-
-      data[i] = trace;
-    });
-
-  data.splice(channels.length, data.length - channels.length);
-
-  data[data.length - 1].xaxis = "x";
-
-  var layout = {
-    margin: {
-      t: 50,
-      b: 0,
-      l: 50,
-      r: 0,
-    },
-    grid: {
-      rows: channels.length,
-      columns: 1,
-      // pattern: "independent",
-      // roworder: "bottom to top",
-    },
-    xaxis: { rangeslider: {} },
-    yaxis: {
-      fixedrange: true,
-    },
-    showlegend: false,
-    annotations: false,
-  };
-
-  if (!hasInitialized) {
-    Plotly.newPlot(chart, data, layout, {
-      scrollZoom: true,
-      responsive: true,
-    });
-    chart.on("plotly_afterplot", reportRenderEvent);
-
-    chart.addEventListener("mousewheel", zoomHandler);
-    chart.on("plotly_relayout", () => {
-      if (lastZoomStart) {
-        graphEvents.zoomPan({
-          type: GRAPH_EVENTS.zoomPan,
-          duration: (performance.now() - lastZoomStart) / 1000,
-        });
-        lastZoomStart = null;
-        chart.addEventListener("mousewheel", zoomHandler);
-      }
-    });
-  } else {
-    Plotly.react(chart, data, layout, {
-      scrollZoom: true,
-      responsive: true,
+        config.trace
+      );
     });
   }
+
+  // Remove channels if no data is provided
+  data.splice(channels.length, data.length - channels.length);
+
+  // Set main xaxis
+  data[data.length - 1].xaxis = "x";
+
+  const layout = Object.assign({}, config.layout);
+  layout.grid.rows = channels.length;
+
+  if (!hasInitialized) {
+    Plotly.newPlot(chart, data, layout, config.options);
+    initEvents();
+  } else {
+    Plotly.react(chart, data, layout, config.options);
+  }
+}
+
+function initEvents() {
+  chart.addEventListener("mousewheel", zoomHandler);
+
+  chart.on("plotly_afterplot", reportRenderEvent);
+
+  chart.on("plotly_relayout", () => {
+    if (lastZoomStart) {
+      graphEvents.zoomPan({
+        type: GRAPH_EVENTS.zoomPan,
+        duration: (performance.now() - lastZoomStart) / 1000,
+      });
+
+      lastZoomStart = null;
+      chart.addEventListener("mousewheel", zoomHandler);
+    }
+  });
 }
 
 function zoomHandler() {
   !lastZoomStart && (lastZoomStart = performance.now());
   chart.removeEventListener("mousewheel", zoomHandler);
 }
-
-function buildModel(incomingDataset, timeSeries) {
-  const outgoingDataset = [];
-
-  for (let i = 0; i < incomingDataset.length; i++) {
-    const channelNumber = channels.length - incomingDataset.length + i;
-    const channel = incomingDataset[i];
-
-    outgoingDataset[`channel_${channelNumber}`] = channel.data;
-  }
-
-  if (incomingDataset.length === channels.length) {
-    outgoingDataset.timestamp = timeSeries;
-  }
-
-  return outgoingDataset;
-}
-
-export function showLoading() {}
-export function hideLoading() {}
 
 function reportRenderEvent() {
   if (!lastEvent) return;
@@ -143,3 +107,6 @@ function reportRenderEvent() {
   }
   lastEvent = null;
 }
+
+export function showLoading() {}
+export function hideLoading() {}
