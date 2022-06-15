@@ -22,6 +22,7 @@ body {
   border: none;
   padding-left: 1rem;
   row-gap: 1rem;
+  width: 14rem;
 }
 
 #chart-header {

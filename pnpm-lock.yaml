@@ -5,6 +5,7 @@ specifiers:
   '@rollup/plugin-replace': ~4.0.0
   cross-env: ^7.0.3
   echarts: ~5.3.1
+  plotly.js-dist: ~2.12.1
   rollup: ~2.70.1
   rollup-plugin-copy-merge: ~0.2.0
   rollup-plugin-jscc: ~2.0.0
@@ -17,6 +18,7 @@ specifiers:
 dependencies:
   '@arction/lcjs': 3.4.0
   echarts: 5.3.2
+  plotly.js-dist: 2.12.1
   sanitize.css: 13.0.0
   workerpool: 6.2.0
 
@@ -660,6 +662,10 @@ packages:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
     dev: true
+
+  /plotly.js-dist/2.12.1:
+    resolution: {integrity: sha512-u3NumBhoNQw5fyr5sfK0jTIa4v1WwruAs0y5bSk055rKklFtyUgwwVZ8VEKCiWqfuPX7OPS3mE4PqvgP4mATOA==}
+    dev: false
 
   /postcss/8.4.12:
     resolution: {integrity: sha512-lg6eITwYe9v6Hr5CncVbK70SoioNQIq81nsaG86ev5hAidQvmOeETBqs7jm43K2F5/Ley3ytDtriImV6TpNiSg==}
