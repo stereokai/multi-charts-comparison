@@ -26,6 +26,16 @@ export function initGraph(container, samplesPerChannel, samplesPerSecond) {
   setChartData(() => regenerateAllChannels(samplesPerChannel));
 }
 
+function updateInteralState(dataset) {
+  for (let i = 0; i < dataset.length; i++) {
+    const channelIndex = channels.length - dataset.length + i;
+    const channelData = dataset[i];
+
+    channels[channelIndex].min = channelData.min;
+    channels[channelIndex].max = channelData.max;
+  }
+}
+
 function updateChart(dataset) {
   chart.update(dataset, timeSeries);
 }
@@ -35,9 +45,9 @@ function setChartData(dataOperation) {
   dataOperation()
     .then((dataset) => {
       chart.graphEvents.dataOperationEnded();
-      return dataset;
+      updateInteralState(dataset);
+      updateChart(dataset);
     })
-    .then(updateChart)
     .catch((err) => {
       console.log("Operation error", err);
     })
