@@ -16,7 +16,7 @@ let prevSamplesPerSecond = 0;
 let timeSeries;
 
 export function on(...args) {
-  chart.on(...args);
+  (chart.on || chart.graphEvents.on)(...args);
 }
 
 export function initGraph(container, samplesPerChannel, samplesPerSecond) {
