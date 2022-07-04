@@ -77,8 +77,18 @@ export function init(container) {
   graphs = channels.map((channel, i) => {
     return addChannel(dashboard, channel, i);
   });
+  graphs.forEach((graph) => registerZoomEvents(graph, minX, maxX));
 
-  registerZoomEvents(container);
+  // Prevent native wheel zoom (interferes with max zoom limitation)
+  container.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+    },
+    {
+      passive: false,
+    }
+  );
 }
 
 export function update(dataset = [], timeSeries) {
@@ -89,6 +99,7 @@ export function update(dataset = [], timeSeries) {
   }
 
   const currGraphsLength = graphs.length;
+  let hasChannelsChanged = false;
 
   dataset.forEach((channelData, i) => {
     let graph = graphs[i];
@@ -96,22 +107,23 @@ export function update(dataset = [], timeSeries) {
 
     // Add new channels
     if (channels.length !== currGraphsLength) {
+      hasChannelsChanged = true;
       channelIndex = currGraphsLength + i;
       graphs.push(addChannel(dashboard, channels[channelIndex], channelIndex));
       graph = graphs[channelIndex];
+      registerZoomEvents(graph);
     }
 
     // Update existing channels
     graph.series.clear();
     graph.series.addArraysXY(timeSeries, channelData.data);
-    channels[channelIndex].min = channelData.min;
-    channels[channelIndex].max = channelData.max;
   });
 
   // Remove channels outside of dataset
   graphs
     .splice(channels.length, graphs.length - channels.length)
     .forEach((graph) => {
+      hasChannelsChanged = true;
       graph.chart.dispose();
       for (let key in graph) {
         graph[key] = null;
@@ -119,22 +131,26 @@ export function update(dataset = [], timeSeries) {
     });
 
   if (timeSeries) updateTimeSeries(timeSeries);
+
   // Synchronize zoom and scroll on all channels
-  axisSyncHandle && axisSyncHandle.remove();
-  axisSyncHandle = synchronizeAxisIntervals(...graphs.map((ch) => ch.xAxis));
-  getBottomGraph().xAxis.setInterval(minX, maxX, false, true);
-  requestAnimationFrame(updateDashboardRowHeights);
+  if (!hasInitialized || hasChannelsChanged) {
+    axisSyncHandle && axisSyncHandle.remove();
+    axisSyncHandle = synchronizeAxisIntervals(...graphs.map((ch) => ch.xAxis));
+    getBottomGraph().xAxis.setInterval(minX, maxX, false, true);
+    requestAnimationFrame(() => {
+      setXAxisStyle();
+      updateDashboardRowHeights();
+    });
+  }
 
   reportRenderEvent();
-
-  window.dashboard = dashboard;
-  window.graphs = graphs;
 }
 
-function updateTimeSeries(timeSeries) {
+function setXAxisStyle() {
   graphs.forEach((graph, i) => {
     graph.xAxis.setTickStrategy(AxisTickStrategies.Empty);
   });
+
   getBottomGraph().xAxis.setTickStrategy(AxisTickStrategies.DateTime, (ticks) =>
     ticks
       .setDateOrigin(new Date(getBaseDate()))
@@ -148,11 +164,11 @@ function updateTimeSeries(timeSeries) {
         minor.setGridStrokeStyle(emptyLine).setTickStyle(emptyLine)
       )
   );
+}
 
-  if (timeSeries) {
-    minX = timeSeries[0];
-    maxX = timeSeries[timeSeries.length - 1];
-  }
+function updateTimeSeries(timeSeries) {
+  minX = timeSeries[0];
+  maxX = timeSeries[timeSeries.length - 1];
 }
 
 function addChannel(dashboard, channel, channelIndex) {
@@ -219,52 +235,30 @@ function addChannel(dashboard, channel, channelIndex) {
   return { chart, series, xAxis, yAxis, row: channelIndex };
 }
 
-function registerZoomEvents(container) {
-  // graphs[0].xAxis.onScaleChange((start, end) => {
-  //   // Prevent zomming out more than full graph width
-  //   if (start < minX || end > maxX) {
-  //     requestAnimationFrame(() => {
-  //       graphs.forEach((graph) =>
-  //         graph.chart.setMouseInteractionWheelZoom(false)
-  //       );
-  //       getBottomGraph().xAxis.setInterval(minX, maxX, false, true);
-  //       setTimeout(() => {
-  //         graphs.forEach((graph) =>
-  //           graph.chart.setMouseInteractionWheelZoom(true)
-  //         );
-  //       }, 1000);
-  //     });
-  //   }
+function registerZoomEvents(graph) {
+  graph.chart.onSeriesBackgroundMouseWheel((_, event) => {
+    let { deltaY } = event;
+    const { xAxis, yAxis } = graph;
+    const { start, end } = xAxis.getInterval();
 
-  graphs.forEach((graph) => {
-    graph.chart.onSeriesBackgroundMouseWheel((_, event) => {
-      const { deltaY } = event;
-      const { xAxis, yAxis } = graph;
-      const { start, end } = xAxis.getInterval();
-      console.log(deltaY);
-      xAxis.setInterval(
-        start + deltaY * 10000,
-        end - deltaY * 10000,
-        false,
-        true
-      );
-    });
-    // Prevent Y axis zoom (Keep full scale of Y axis at all times)
-    // graphs.forEach((graph, i) => {
-    //   graph.yAxis.setInterval(channels[i].min, channels[i].max);
-    // });
+    deltaY = -deltaY;
+    const newInterval = getNewInterval(start, end, deltaY, minX, maxX);
+    xAxis.setInterval(newInterval.start, newInterval.end, false, true);
   });
+}
 
-  // Prevent native wheel zoom (interferes with max zoom limitation)
-  container.addEventListener(
-    "wheel",
-    (e) => {
-      e.preventDefault();
-    },
-    {
-      passive: false,
-    }
-  );
+function getNewInterval(start, end, deltaY, minX, maxX, zoomRate = 10000) {
+  if (zoomRate < 1000) return false; // Limit zoom rate, below 1000 is too slow
+
+  const newStart = Math.min(maxX, Math.max(minX, start + deltaY * zoomRate));
+  const newEnd = Math.max(minX, Math.min(maxX, end - deltaY * zoomRate));
+
+  // Prevent zoom-flipping (zooming in over max zoom in turns to zooming out),
+  // But try squeezing as much zoom in as possible
+  if (newEnd < maxX / 2 || newStart * 2 > maxX)
+    return getNewInterval(start, end, deltaY, minX, maxX, zoomRate / 2);
+
+  return { start: newStart, end: newEnd };
 }
 
 function reportRenderEvent() {
