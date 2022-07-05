@@ -1,3 +1,7 @@
 {{#each channels}}
-  <li>{{name}}</li>
+  <li class="channels-list-item">
+    <button class="toggle-channel"></button>
+    <button class="pin-channel"></button>
+    <span class="channel-name">{{name}}</span>
+  </li>
 {{/each}}
