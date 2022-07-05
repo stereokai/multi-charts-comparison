@@ -169,3 +169,13 @@ body {
 #extra-features.show {
   display: block;
 }
+
+#extra-features-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+input[type="checkbox"] {
+  margin: 0 0.5rem 0 0;
+}

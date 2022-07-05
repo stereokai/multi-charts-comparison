@@ -24,19 +24,13 @@ function init() {
   labels.chartHeader.innerHTML = graphs.renderer;
 
   if (!hasAllFeatures) {
-    RENDERERS.forEach((renderer) => {
-      const link = document.createElement("a");
-      link.href = "/" + renderer.toLowerCase();
-      link.innerHTML = renderer;
-      link.className = "button";
-      link.className += renderer === graphs.renderer ? " on" : "";
-      renderers.appendChild(link);
-    });
     extraFeatures.parentElement.removeChild(extraFeatures);
     renderers.classList.add("show");
+    initRenderers(renderers);
   } else {
     renderers.parentElement.removeChild(renderers);
     extraFeatures.classList.add("show");
+    initExtraFeatures(extraFeatures);
   }
 
   updateTotalSamples();
@@ -118,5 +112,24 @@ if (document.readyState == "complete" || document.readyState == "interactive") {
 } else {
   document.addEventListener("DOMContentLoaded", () => {
     init();
+  });
+}
+
+function initRenderers(renderers) {
+  RENDERERS.forEach((renderer) => {
+    const link = document.createElement("a");
+    link.href = "/" + renderer.toLowerCase();
+    link.innerHTML = renderer;
+    link.className = "button";
+    link.className += renderer === graphs.renderer ? " on" : "";
+    renderers.appendChild(link);
+  });
+}
+
+function initExtraFeatures() {
+  const xfToggleGrid = document.querySelector("#xf-toggle-grid");
+
+  xfToggleGrid.addEventListener("change", (event) => {
+    graphs.api.toggleGrid(event.target.checked);
   });
 }

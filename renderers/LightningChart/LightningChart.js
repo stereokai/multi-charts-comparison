@@ -21,3 +21,14 @@ export function update(...args) {
 
 export function showLoading() {}
 export function hideLoading() {}
+
+const apiProxi = {
+  get: (target, prop, receiver) => {
+    if (target[prop] && typeof target[prop] === "function") {
+      return target[prop];
+    } else {
+      throw new Error(`API doesn't exist: ${prop}`);
+    }
+  },
+};
+export const api = new Proxy(lightningChart, apiProxi);

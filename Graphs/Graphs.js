@@ -116,3 +116,5 @@ export function onSettingChange(
 
   setChartData(operation);
 }
+
+export const { api } = chart;

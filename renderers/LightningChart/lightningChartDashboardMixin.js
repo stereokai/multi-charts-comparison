@@ -89,5 +89,9 @@ const lightningChartDashboardMixin = (Base) =>
       const { mainGraph, minX, maxX } = this;
       mainGraph.xAxis.setInterval(minX, maxX, false, true);
     }
+
+    toggleGrid(...args) {
+      console.log("toggleGrid", ...args);
+    }
   };
 export default lightningChartDashboardMixin;
