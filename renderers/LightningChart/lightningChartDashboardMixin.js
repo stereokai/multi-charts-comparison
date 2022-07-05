@@ -5,12 +5,20 @@ import {
   emptyLine,
   lightningChart,
   SolidFill,
+  SolidLine,
   synchronizeAxisIntervals,
   Themes,
 } from "@arction/lcjs";
 
 const lightningChartDashboardMixin = (Base) =>
   class LightningChartDashboard extends Base {
+    static visibleGridStyle = new SolidLine({
+      thickness: 1,
+      fillStyle: new SolidFill({ color: ColorCSS("#dfdfdf") }),
+    });
+
+    static hiddenGridStyle = emptyLine;
+
     static getNewDashboard(container, numberOfRows) {
       return lightningChart({
         overrideInteractionMouseButtons: {
@@ -90,8 +98,19 @@ const lightningChartDashboardMixin = (Base) =>
       mainGraph.xAxis.setInterval(minX, maxX, false, true);
     }
 
-    toggleGrid(...args) {
-      console.log("toggleGrid", ...args);
+    toggleGrid(shouldShowGrids) {
+      this.graphs.forEach((graph) => {
+        const tickStrategy = graph.yAxis.getTickStrategy();
+        graph.yAxis.setTickStrategy(tickStrategy, (tickStrategy) =>
+          tickStrategy.setMajorTickStyle((major) =>
+            major.setGridStrokeStyle(
+              shouldShowGrids
+                ? LightningChartDashboard.visibleGridStyle
+                : LightningChartDashboard.hiddenGridStyle
+            )
+          )
+        );
+      });
     }
   };
 export default lightningChartDashboardMixin;
