@@ -1,9 +1,12 @@
 import * as graphs from "@/Graphs/Graphs.js";
 import { default as app } from "@/models/ui.js";
+import channelListItem from "@/partials/channel-list-item.hbs?raw";
 import { hasAllFeatures, RENDERERS } from "@/router.js";
 import { debounce } from "@/utils.js";
+import Handlebars from "handlebars";
 import { channels } from "./models/state.js";
 
+let channelListItemTemplate;
 const labels = {};
 const FRIENDLY_NAMES = {
   [graphs.EVENTS.init]: "First render",
@@ -131,6 +134,7 @@ function buildRenderers(renderers) {
 }
 
 function buildExtraFeatures() {
+  channelListItemTemplate = Handlebars.compile(channelListItem);
   const xfToggleGrid = document.querySelector("#xf-toggle-grid");
   xfToggleGrid.checked = app.extraFeatures.toggleGrid;
   xfToggleGrid.addEventListener("change", (event) => {
@@ -151,13 +155,7 @@ function buildChannelList() {
     return;
   }
 
-  channelsList.innerHTML = "";
-
-  channels.forEach((channel) => {
-    const li = document.createElement("li");
-    li.innerHTML = channel.name;
-    channelsList.appendChild(li);
-  });
+  channelsList.innerHTML = channelListItemTemplate({ channels });
 
   // // add event listeners to each channel
   // const channelLinks = document.querySelectorAll("#channels-list li");
