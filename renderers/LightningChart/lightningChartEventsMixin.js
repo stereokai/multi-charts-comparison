@@ -1,4 +1,5 @@
 import GRAPH_EVENTS, { graphEventsFactory } from "@/Graphs/graphEvents.js";
+import { hide, move, setPosition } from "./AreaZoom/AreaZoom.js";
 
 const lightningChartEventsMixin = (Base) =>
   class LightningChartEvents extends Base {
@@ -24,6 +25,7 @@ const lightningChartEventsMixin = (Base) =>
 
         deltaY = -deltaY;
         const newInterval = this.getNewInterval(start, end, deltaY);
+
         xAxis.setInterval(newInterval.start, newInterval.end, false, true);
       });
     }
@@ -40,7 +42,7 @@ const lightningChartEventsMixin = (Base) =>
 
       // Prevent zoom-flipping (zooming in over max zoom in turns to zooming out),
       // But try squeezing as much zoom in as possible
-      if (newEnd < maxX / 2 || newStart * 2 > maxX)
+      if (/*newEnd < maxX / 2 || */ newStart * 2 > maxX)
         return this.getNewInterval(start, end, deltaY, zoomRate / 2);
 
       return { start: newStart, end: newEnd };
@@ -65,6 +67,62 @@ const lightningChartEventsMixin = (Base) =>
 
         this.lastEvent = null;
       });
+    }
+
+    toggleAreaZoom(shouldTurnOn) {
+      if (shouldTurnOn) {
+        this.graphs.forEach((graph) => {
+          const { chart } = graph;
+          chart.setMouseInteractionPan(false);
+
+          graph.chartEvents = {
+            offSeriesBackgroundMouseDragStart:
+              chart.onSeriesBackgroundMouseDragStart(
+                (series, pointerEvent, button) => {
+                  if (button !== 0) return;
+                  setPosition(pointerEvent.offsetX);
+                }
+              ),
+            offSeriesBackgroundMouseDrag: chart.onSeriesBackgroundMouseDrag(
+              (chart, pointerEvent, button) => {
+                if (button !== 0) return;
+                move(pointerEvent.offsetX);
+              }
+            ),
+            offSeriesBackgroundMouseDragStop:
+              chart.onSeriesBackgroundMouseDragStop(
+                (chart, pointerEvent, button) => {
+                  if (button !== 0) return;
+                  const result = hide();
+                  const pixelSizeX = chart
+                    .getSeries()[0]
+                    .scale.x.getPixelSize();
+
+                  const int = this.mainGraph.xAxis.getInterval();
+                  const startPixels = int.start / pixelSizeX - 160; // 160 left padding
+
+                  this.mainGraph.xAxis.setInterval(
+                    (startPixels + result.x) * pixelSizeX,
+                    (startPixels + result.x + result.width) * pixelSizeX,
+                    false,
+                    true
+                  );
+                }
+              ),
+          };
+        });
+      } else {
+        this.graphs.forEach((graph) => {
+          const { chart } = graph;
+
+          for (const [off, token] of Object.entries(graph.chartEvents)) {
+            chart[off](token);
+            graph.chartEvents[off] = null;
+          }
+
+          chart.setMouseInteractionPan(true);
+        });
+      }
     }
   };
 export default lightningChartEventsMixin;

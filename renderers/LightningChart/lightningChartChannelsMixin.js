@@ -21,7 +21,8 @@ const lightningChartChannelsMixin = (Base) =>
         .setTitle("")
         .setPadding({ left: 100, top: 0, bottom: 0 })
         .setBackgroundStrokeStyle(emptyLine)
-        .setMouseInteractionWheelZoom(false)
+        .setMouseInteractions(false)
+        .setMouseInteractionPan(true)
         .setSeriesBackgroundFillStyle(
           new SolidFill({
             color: ColorCSS("white"),
@@ -30,6 +31,7 @@ const lightningChartChannelsMixin = (Base) =>
 
       const xAxis = chart
         .getDefaultAxisX()
+        .setMouseInteractions(false)
         .setTickStrategy(AxisTickStrategies.Empty, (styler) =>
           console.log(styler)
         )

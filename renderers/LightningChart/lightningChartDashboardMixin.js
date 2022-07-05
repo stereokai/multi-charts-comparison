@@ -11,6 +11,8 @@ import {
   Themes,
 } from "@arction/lcjs";
 
+import * as areaZoom from "./AreaZoom";
+
 const lightningChartDashboardMixin = (Base) =>
   class LightningChartDashboard extends Base {
     static visibleGridStyle = new SolidLine({
@@ -47,24 +49,28 @@ const lightningChartDashboardMixin = (Base) =>
         container,
         numberOfRows
       );
+      areaZoom.init(container);
     }
 
     updateDashboardRowHeights() {
       const { dashboard, graphs, pinnedGraphs, mainGraph, maxVisibleCharts } =
         this;
 
-      const visibleCharts = graphs
+      const visibleGraphs = graphs
         .map((g, i) => i)
-        .filter((i) => !channels[i].isHidden)
-        .concat(pinnedGraphs.map((g) => g.pinnedIndex));
+        .filter((i) => !channels[i].isHidden);
+
+      const visiblePinnedGraphs = pinnedGraphs.map((g) => g.pinnedIndex);
+
+      const allVisibleGraphs = visibleGraphs.concat(visiblePinnedGraphs);
 
       const axisHeight = mainGraph.xAxis.getHeight();
       const rowHeight =
         (dashboard.engine.container.clientHeight - axisHeight) /
-        visibleCharts.length;
+        allVisibleGraphs.length;
 
       for (let row = 0; row < maxVisibleCharts; row++) {
-        if (visibleCharts.includes(row)) {
+        if (allVisibleGraphs.includes(row)) {
           dashboard.setRowHeight(row, Math.round(rowHeight));
         } else {
           dashboard.setRowHeight(row, 0.00001);
@@ -72,6 +78,8 @@ const lightningChartDashboardMixin = (Base) =>
       }
 
       dashboard.setRowHeight(mainGraph.row, Math.round(rowHeight + axisHeight));
+      window.dashboard = dashboard;
+      areaZoom.setHeight(visibleGraphs.length * rowHeight);
     }
 
     setXAxisStyle() {

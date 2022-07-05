@@ -142,6 +142,12 @@ function buildExtraFeatures() {
     graphs.api.toggleGrid(event.target.checked);
   });
 
+  const xfAreaZoom = document.querySelector("#xf-area-zoom");
+  xfAreaZoom.checked = app.extraFeatures.areaZoom;
+  xfAreaZoom.addEventListener("change", (event) => {
+    graphs.api.toggleAreaZoom(event.target.checked);
+  });
+
   channelList = document.querySelector("#channels-list");
 
   channelList.addEventListener("click", (e) => {
