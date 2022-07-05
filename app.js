@@ -26,11 +26,11 @@ function init() {
   if (!hasAllFeatures) {
     extraFeatures.parentElement.removeChild(extraFeatures);
     renderers.classList.add("show");
-    initRenderers(renderers);
+    buildRenderers(renderers);
   } else {
     renderers.parentElement.removeChild(renderers);
     extraFeatures.classList.add("show");
-    initExtraFeatures(extraFeatures);
+    buildExtraFeatures(extraFeatures);
   }
 
   updateTotalSamples();
@@ -115,7 +115,7 @@ if (document.readyState == "complete" || document.readyState == "interactive") {
   });
 }
 
-function initRenderers(renderers) {
+function buildRenderers(renderers) {
   RENDERERS.forEach((renderer) => {
     const link = document.createElement("a");
     link.href = "/" + renderer.toLowerCase();
@@ -126,10 +126,12 @@ function initRenderers(renderers) {
   });
 }
 
-function initExtraFeatures() {
+function buildExtraFeatures() {
   const xfToggleGrid = document.querySelector("#xf-toggle-grid");
-
+  xfToggleGrid.checked = app.extraFeatures.toggleGrid;
   xfToggleGrid.addEventListener("change", (event) => {
     graphs.api.toggleGrid(event.target.checked);
   });
 }
+
+function initExtraFeatures() {}
