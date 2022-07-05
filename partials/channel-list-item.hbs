@@ -1,7 +1,7 @@
 {{#each channels}}
   <li class="channels-list-item">
     <label class="target toggle-channel" channel-index="{{@index}}">
-      <input type="checkbox" />
+      <input type="checkbox" {{#if isHidden}}checked{{/if}} />
       <svg aria-hidden="true" class="unchecked">
         <use href="#icon-show" fill="#fff"></use>
       </svg>
@@ -10,7 +10,7 @@
       </svg>
     </label>
     <label class="target pin-channel" channel-index="{{@index}}">
-      <input type="checkbox" />
+      <input type="checkbox" {{#if isSticky}}checked{{/if}} />
       <svg aria-hidden="true" class="rotate smaller">
         <use href="#icon-pin" fill="#fff"></use>
       </svg>
