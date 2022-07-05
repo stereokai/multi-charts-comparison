@@ -7,6 +7,7 @@ import Handlebars from "handlebars";
 import { channels } from "./models/state.js";
 
 let channelListItemTemplate;
+let channelList;
 const labels = {};
 const FRIENDLY_NAMES = {
   [graphs.EVENTS.init]: "First render",
@@ -141,21 +142,34 @@ function buildExtraFeatures() {
     graphs.api.toggleGrid(event.target.checked);
   });
 
+  channelList = document.querySelector("#channels-list");
+
+  channelList.addEventListener("click", (e) => {
+    const { target } = e;
+    const channelIndex = [
+      ...target.parentElement.parentElement.children,
+    ].indexOf(target.parentElement);
+
+    if (target.classList.contains("toggle-channel")) {
+      channels[channelIndex].isHidden = !channels[channelIndex].isHidden;
+      graphs.api.toggleChannelVisibility(channelIndex);
+    }
+  });
+
   buildChannelList();
 }
 
 function buildChannelList() {
   // build unordered list of channels and append to #channels-list
-  const channelsList = document.querySelector("#channels-list");
 
-  if (channelsList.childElementCount > app.channels.value) {
-    while (channelsList.childElementCount > app.channels.value) {
-      channelsList.removeChild(channelsList.lastChild);
+  if (channelList.childElementCount > app.channels.value) {
+    while (channelList.childElementCount > app.channels.value) {
+      channelList.removeChild(channelList.lastChild);
     }
     return;
   }
 
-  channelsList.innerHTML = channelListItemTemplate({ channels });
+  channelList.innerHTML = channelListItemTemplate({ channels });
 
   // // add event listeners to each channel
   // const channelLinks = document.querySelectorAll("#channels-list li");

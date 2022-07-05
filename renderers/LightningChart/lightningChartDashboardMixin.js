@@ -1,4 +1,5 @@
 import { getBaseDate } from "@/Graphs/graphCommon";
+import { channels } from "@/models/state.js";
 import {
   AxisTickStrategies,
   ColorCSS,
@@ -52,9 +53,10 @@ const lightningChartDashboardMixin = (Base) =>
       const { dashboard, graphs, mainGraph, maxVisibleCharts } = this;
       const axisHeight = mainGraph.xAxis.getHeight();
       const rowHeight =
-        (dashboard.engine.container.clientHeight - axisHeight) / graphs.length;
+        (dashboard.engine.container.clientHeight - axisHeight) /
+        graphs.filter((g, i) => !channels[i].isHidden).length;
       for (let row = 0; row < maxVisibleCharts; row++) {
-        if (row < graphs.length) {
+        if (row < graphs.length && !channels[row].isHidden) {
           dashboard.setRowHeight(row, Math.round(rowHeight));
         } else {
           dashboard.setRowHeight(row, 0.00001);
@@ -111,6 +113,21 @@ const lightningChartDashboardMixin = (Base) =>
           )
         );
       });
+    }
+
+    toggleChannelVisibility(channelIndex) {
+      const graph = this.graphs[channelIndex];
+      const isHidden = channels[channelIndex].isHidden;
+
+      if (isHidden) {
+        graph.series.dispose();
+        graph.yAxis.dispose();
+      } else {
+        graph.series.restore();
+        graph.yAxis.restore();
+      }
+
+      this.updateDashboardRowHeights();
     }
   };
 export default lightningChartDashboardMixin;
