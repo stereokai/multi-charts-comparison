@@ -153,6 +153,13 @@ function buildExtraFeatures() {
     if (target.classList.contains("toggle-channel")) {
       channels[channelIndex].isHidden = !channels[channelIndex].isHidden;
       graphs.api.toggleChannelVisibility(channelIndex);
+      return;
+    }
+
+    if (target.classList.contains("pin-channel")) {
+      channels[channelIndex].isSticky = !channels[channelIndex].isSticky;
+      graphs.api.toggleChannelSticky(channelIndex);
+      return;
     }
   });
 

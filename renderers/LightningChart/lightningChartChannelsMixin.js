@@ -9,7 +9,7 @@ import {
 
 const lightningChartChannelsMixin = (Base) =>
   class LightningChartChannelsMixin extends Base {
-    static addChannel(dashboard, channel, channelIndex) {
+    static addChannel(dashboard, channel, channelIndex, colorIndex) {
       const chart = dashboard
         .createChartXY({
           columnIndex: 0,
@@ -70,25 +70,31 @@ const lightningChartChannelsMixin = (Base) =>
             regularProgressiveStep: true,
             allowDataGrouping: true,
           },
-          automaticColorIndex: channelIndex,
+          automaticColorIndex:
+            typeof colorIndex === "number" ? colorIndex : channelIndex,
         })
         .setStrokeStyle((solidLine) => solidLine.setThickness(-1));
 
       return { chart, series, xAxis, yAxis, row: channelIndex };
     }
 
-    addChannel(channel, channelIndex) {
+    addChannel(channel, channelIndex, colorIndex) {
       return LightningChartChannelsMixin.addChannel(
         this.dashboard,
         channel,
-        channelIndex
+        channelIndex,
+        colorIndex
       );
     }
 
     initializeChannels(channels) {
-      this.graphs = channels.map((channel, i) => {
-        return this.addChannel(channel, i);
-      });
+      this.graphs.splice(
+        0,
+        0,
+        ...channels.map((channel, i) => {
+          return this.addChannel(channel, i);
+        })
+      );
       this.graphs.forEach((graph) => this.registerZoomEvents(graph));
     }
   };

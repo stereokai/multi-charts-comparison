@@ -20,6 +20,7 @@ export default class LightningChartImpl {
 
   constructor() {
     this.graphs = [];
+    this.pinnedGraphs = [];
   }
 
   init(container) {

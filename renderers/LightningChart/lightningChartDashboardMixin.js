@@ -50,13 +50,21 @@ const lightningChartDashboardMixin = (Base) =>
     }
 
     updateDashboardRowHeights() {
-      const { dashboard, graphs, mainGraph, maxVisibleCharts } = this;
+      const { dashboard, graphs, pinnedGraphs, mainGraph, maxVisibleCharts } =
+        this;
+
+      const visibleCharts = graphs
+        .map((g, i) => i)
+        .filter((i) => !channels[i].isHidden)
+        .concat(pinnedGraphs.map((g) => g.pinnedIndex));
+
       const axisHeight = mainGraph.xAxis.getHeight();
       const rowHeight =
         (dashboard.engine.container.clientHeight - axisHeight) /
-        graphs.filter((g, i) => !channels[i].isHidden).length;
+        visibleCharts.length;
+
       for (let row = 0; row < maxVisibleCharts; row++) {
-        if (row < graphs.length && !channels[row].isHidden) {
+        if (visibleCharts.includes(row)) {
           dashboard.setRowHeight(row, Math.round(rowHeight));
         } else {
           dashboard.setRowHeight(row, 0.00001);
@@ -125,6 +133,45 @@ const lightningChartDashboardMixin = (Base) =>
       } else {
         graph.series.restore();
         graph.yAxis.restore();
+      }
+
+      this.updateDashboardRowHeights();
+    }
+
+    toggleChannelSticky(channelIndex) {
+      const { pinnedGraphs, graphs } = this;
+
+      const graph = graphs[channelIndex];
+      const channel = channels[channelIndex];
+
+      if (channel.isSticky) {
+        const pinnedIndex =
+          (pinnedGraphs.length &&
+            pinnedGraphs[pinnedGraphs.length - 1].pinnedIndex - 1) ||
+          this.maxVisibleCharts - 1;
+
+        const pinnedGraph = this.addChannel(
+          channel,
+          pinnedIndex,
+          channelIndex // Use same color as the channel
+        );
+
+        pinnedGraph.isSticky = true;
+        pinnedGraph.pinnedIndex = pinnedIndex;
+        pinnedGraphs.push(pinnedGraph);
+        pinnedGraph.series.add(graph.series.kc[0].La);
+        channel.pinnedGraph = pinnedGraph;
+      } else {
+        const pinnedGraph = channel.pinnedGraph;
+        channel.pinnedGraph = null;
+        pinnedGraphs
+          .splice(pinnedGraphs.indexOf(pinnedGraph), 1)
+          .forEach((graph) => {
+            graph.chart.dispose();
+            for (let key in graph) {
+              graph[key] = null;
+            }
+          });
       }
 
       this.updateDashboardRowHeights();
