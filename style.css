@@ -200,20 +200,50 @@ h4 {
 }
 
 .channels-list-item {
-  list-style: none;
+  display: flex;
+  align-items: center;
 }
 
-.channels-list-item > button {
+.channels-list-item > label {
   width: 1rem;
   height: 1rem;
   cursor: pointer;
   border: none;
-  background: #0075ff;
+  background: none;
   color: white;
   position: relative;
   top: -2px;
+  margin-right: 0.3rem;
 }
 
-.channels-list-item > button:hover {
+.channels-list-item > label > svg:hover {
   background: #03a9f4;
+}
+
+.channels-list-item > label > svg {
+  width: 1rem;
+  height: 1rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #0075ff;
+}
+
+.channels-list-item > label > svg.checked {
+  visibility: hidden;
+}
+
+.channels-list-item > label > input {
+  visibility: hidden;
+  position: absolute;
+}
+.channels-list-item > label > input:checked + svg {
+  transform: rotate(90deg);
+  background: #03a9f4;
+}
+.channels-list-item > label > input:checked ~ svg.checked {
+  visibility: visible;
+}
+.channels-list-item > label > input:checked + svg.unchecked {
+  visibility: hidden;
 }

@@ -1,7 +1,15 @@
 {{#each channels}}
   <li class="channels-list-item">
-    <button class="toggle-channel"></button>
-    <button class="pin-channel"></button>
+    <label class="target toggle-channel" channel-index="{{@index}}">
+      <input type="checkbox" />
+      <svg aria-hidden="true" class="unchecked">
+        <use href="#icon-show" fill="#fff"></use>
+      </svg>
+      <svg aria-hidden="true" class="checked">
+        <use href="#icon-hide" fill="#fff"></use>
+      </svg>
+    </label>
+    {{! <button class="pin-channel"></button> }}
     <span class="channel-name">{{name}}</span>
   </li>
 {{/each}}

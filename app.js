@@ -145,10 +145,10 @@ function buildExtraFeatures() {
   channelList = document.querySelector("#channels-list");
 
   channelList.addEventListener("click", (e) => {
-    const { target } = e;
-    const channelIndex = [
-      ...target.parentElement.parentElement.children,
-    ].indexOf(target.parentElement);
+    if (e.target.tagName !== "INPUT") return;
+
+    const target = e.path.find((el) => el.classList.contains("target"));
+    const channelIndex = target.getAttribute("channel-index") | 0;
 
     if (target.classList.contains("toggle-channel")) {
       channels[channelIndex].isHidden = !channels[channelIndex].isHidden;
