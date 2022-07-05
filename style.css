@@ -80,6 +80,14 @@ body {
   background: #03a9f4;
 }
 
+#renderers {
+  display: none;
+}
+
+#renderers.show {
+  display: block;
+}
+
 #renderers > .button {
   display: inline-block;
   margin: 0.7rem;
@@ -152,4 +160,12 @@ body {
   to {
     background: transparent;
   }
+}
+
+#extra-features {
+  display: none;
+}
+
+#extra-features.show {
+  display: block;
 }

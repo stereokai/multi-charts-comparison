@@ -1,6 +1,6 @@
 import * as graphs from "@/Graphs/Graphs.js";
 import { default as app } from "@/models/ui.js";
-import { RENDERERS } from "@/router.js";
+import { hasAllFeatures, RENDERERS } from "@/router.js";
 import { debounce } from "@/utils.js";
 
 const labels = {};
@@ -12,6 +12,7 @@ const FRIENDLY_NAMES = {
 
 function init() {
   const renderers = document.querySelector("#renderers");
+  const extraFeatures = document.querySelector("#extra-features");
   labels.channels = document.querySelector("#label-channels");
   labels.period = document.querySelector("#label-period");
   labels.samples = document.querySelector("#label-samples");
@@ -21,14 +22,22 @@ function init() {
   labels.chartHeader = document.querySelector("#chart-header");
 
   labels.chartHeader.innerHTML = graphs.renderer;
-  RENDERERS.forEach((renderer) => {
-    const link = document.createElement("a");
-    link.href = "/" + renderer.toLowerCase();
-    link.innerHTML = renderer;
-    link.className = "button";
-    link.className += renderer === graphs.renderer ? " on" : "";
-    renderers.appendChild(link);
-  });
+
+  if (!hasAllFeatures) {
+    RENDERERS.forEach((renderer) => {
+      const link = document.createElement("a");
+      link.href = "/" + renderer.toLowerCase();
+      link.innerHTML = renderer;
+      link.className = "button";
+      link.className += renderer === graphs.renderer ? " on" : "";
+      renderers.appendChild(link);
+    });
+    extraFeatures.parentElement.removeChild(extraFeatures);
+    renderers.classList.add("show");
+  } else {
+    renderers.parentElement.removeChild(renderers);
+    extraFeatures.classList.add("show");
+  }
 
   updateTotalSamples();
   Object.keys(graphs.EVENTS).forEach((event) => {
