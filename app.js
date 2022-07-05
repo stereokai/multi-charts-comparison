@@ -2,6 +2,7 @@ import * as graphs from "@/Graphs/Graphs.js";
 import { default as app } from "@/models/ui.js";
 import { hasAllFeatures, RENDERERS } from "@/router.js";
 import { debounce } from "@/utils.js";
+import { channels } from "./models/state.js";
 
 const labels = {};
 const FRIENDLY_NAMES = {
@@ -82,6 +83,7 @@ function onSliderChange(event) {
   app[name].value = value;
   updateTotalSamples();
   updateGraphSettings();
+  hasAllFeatures && buildChannelList();
 }
 
 function onGraphEvent(graphEvent) {
@@ -95,6 +97,7 @@ function onGraphEvent(graphEvent) {
   }
   if (graphEvent.type === graphs.EVENTS.dataOperationEnd) {
     labels.chartHeader.classList.remove("show-loader");
+    hasAllFeatures && buildChannelList();
     return;
   }
 
@@ -107,6 +110,7 @@ function onGraphEvent(graphEvent) {
     }, 1000);
   });
 }
+
 if (document.readyState == "complete" || document.readyState == "interactive") {
   init();
 } else {
@@ -132,6 +136,38 @@ function buildExtraFeatures() {
   xfToggleGrid.addEventListener("change", (event) => {
     graphs.api.toggleGrid(event.target.checked);
   });
+
+  buildChannelList();
+}
+
+function buildChannelList() {
+  // build unordered list of channels and append to #channels-list
+  const channelsList = document.querySelector("#channels-list");
+
+  if (channelsList.childElementCount > app.channels.value) {
+    while (channelsList.childElementCount > app.channels.value) {
+      channelsList.removeChild(channelsList.lastChild);
+    }
+    return;
+  }
+
+  channelsList.innerHTML = "";
+
+  channels.forEach((channel) => {
+    const li = document.createElement("li");
+    li.innerHTML = channel.name;
+    channelsList.appendChild(li);
+  });
+
+  // // add event listeners to each channel
+  // const channelLinks = document.querySelectorAll("#channels-list li");
+  // channelLinks.forEach((link) => {
+  //   link.addEventListener("click", (event) => {
+  //     const channel = event.target.innerHTML;
+  //     graphs.api.toggleChannel(channel);
+  //   }
+  //   );
+  // });
 }
 
 function initExtraFeatures() {}
