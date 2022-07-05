@@ -9,7 +9,12 @@
         <use href="#icon-hide" fill="#fff"></use>
       </svg>
     </label>
-    {{! <button class="pin-channel"></button> }}
+    <label class="target pin-channel" channel-index="{{@index}}">
+      <input type="checkbox" />
+      <svg aria-hidden="true" class="rotate smaller">
+        <use href="#icon-pin" fill="#fff"></use>
+      </svg>
+    </label>
     <span class="channel-name">{{name}}</span>
   </li>
 {{/each}}

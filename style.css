@@ -216,8 +216,9 @@ h4 {
   margin-right: 0.3rem;
 }
 
-.channels-list-item > label > svg:hover {
-  background: #03a9f4;
+.channels-list-item > label > input {
+  visibility: hidden;
+  position: absolute;
 }
 
 .channels-list-item > label > svg {
@@ -228,17 +229,13 @@ h4 {
   left: 0;
   background: #0075ff;
 }
-
+.channels-list-item > label > svg:hover {
+  background: #03a9f4;
+}
 .channels-list-item > label > svg.checked {
   visibility: hidden;
 }
-
-.channels-list-item > label > input {
-  visibility: hidden;
-  position: absolute;
-}
 .channels-list-item > label > input:checked + svg {
-  transform: rotate(90deg);
   background: #03a9f4;
 }
 .channels-list-item > label > input:checked ~ svg.checked {
@@ -246,4 +243,11 @@ h4 {
 }
 .channels-list-item > label > input:checked + svg.unchecked {
   visibility: hidden;
+}
+.channels-list-item > label > input:checked + svg.rotate {
+  transform: rotate(90deg);
+}
+.channels-list-item > label > svg.smaller > use {
+  transform: scale(0.7);
+  transform-origin: center;
 }
