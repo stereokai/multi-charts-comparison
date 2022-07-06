@@ -1,4 +1,4 @@
-import{c as commonjsGlobal}from"./vendor.285b38b1.js";var workerpool$1={exports:{}};/**
+import{c as commonjsGlobal}from"./vendor.d274a670.js";var workerpool$1={exports:{}};/**
  * workerpool.js
  * https://github.com/josdejong/workerpool
  *
