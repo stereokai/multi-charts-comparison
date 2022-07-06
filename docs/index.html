@@ -5,105 +5,107 @@
     <link rel="icon" type="image/svg+xml" href="/multi-charts-comparison/assets/favicon.17e50649.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
-    <script type="module" crossorigin src="/multi-charts-comparison/assets/index.796d75f9.js"></script>
+    <script type="module" crossorigin src="/multi-charts-comparison/assets/index.7432e16c.js"></script>
     <link rel="modulepreload" href="/multi-charts-comparison/assets/vendor.d274a670.js">
     <link rel="modulepreload" href="/multi-charts-comparison/assets/workerpool.6082762e.js">
     <link rel="modulepreload" href="/multi-charts-comparison/assets/echarts.2351e824.js">
     <link rel="modulepreload" href="/multi-charts-comparison/assets/echarts.renderer.f38a4c36.js">
-    <link rel="modulepreload" href="/multi-charts-comparison/assets/lightningchart.renderer.82ffdc12.js">
+    <link rel="modulepreload" href="/multi-charts-comparison/assets/lightningchart.renderer.75ec90d8.js">
     <link rel="stylesheet" href="/multi-charts-comparison/assets/vendor.d5b0724f.css">
-    <link rel="stylesheet" href="/multi-charts-comparison/assets/index.f72ada94.css">
+    <link rel="stylesheet" href="/multi-charts-comparison/assets/index.a00459a3.css">
   </head>
   <body>
     <main id="app">
       <fieldset id="toolbar">
-        <div class="toolbarItem">
-          <h1 id="chart-header"></h1>
-        </div>
-      
-        <div class="toolbar-item">
-          <label id="label-total">Total samples:</label>
-          <span id="total-samples">0</span>
-        </div>
-      
-        <div class="toolbar-item">
-          <label>Last event: <span id="last-event"></span></label>
-          <span id="last-event-duration"></span>
-        </div>
-      
-        <div class="toolbar-item slider">
-          <label id="label-channels" for="channels"
-            >Channels: 10</label
-          >
-          <div class="labeled-range">
-            <span class="range-label">10</span>
-            <input
-              type="range"
-              id="range-channels"
-              name="channels"
-              value="10"
-              min="10"
-              max="25"
-            />
-            <span class="range-label">25</span>
+        <div class="toolbar-main">
+          <div class="toolbarItem">
+            <h1 id="chart-header"></h1>
           </div>
-        </div>
       
-        <div class="toolbar-item slider">
-          <label id="label-period" for="period"
-            >Sleep period (h): 8</label
-          >
-          <div class="labeled-range">
-            <span class="range-label">8</span>
-            <input
-              type="range"
-              id="range-period"
-              name="period"
-              value="8"
-              min="8"
-              max="14"
-            />
-            <span class="range-label">14</span>
+          <div class="toolbar-item">
+            <label id="label-total">Total samples:</label>
+            <span id="total-samples">0</span>
           </div>
-        </div>
       
-        <div class="toolbar-item slider">
-          <label id="label-samples" for="samples"
-            >Samples per second: 1</label
-          >
-          <div class="labeled-range">
-            <span class="range-label">1</span>
-            <input
-              type="range"
-              id="range-samples"
-              name="samples"
-              value="1"
-              min="1"
-              max="100"
-            />
-            <span class="range-label">100</span>
+          <div class="toolbar-item">
+            <label>Last event: <span id="last-event"></span></label>
+            <span id="last-event-duration"></span>
           </div>
-        </div>
       
-        <div id="renderers">
-          <h3>Available renderers:</h3>
-        </div>
-      
-        <div id="extra-features">
-          <h3>Extra features:</h3>
-          <div id="extra-features-controls">
-            <label
-              ><input id="xf-toggle-grid" type="checkbox" />Toggle grid behind
-              graphs</label
+          <div class="toolbar-item slider">
+            <label id="label-channels" for="channels"
+              >Channels: 10</label
             >
-            <label><input id="xf-area-zoom" type="checkbox" />Toggle area zoom</label>
+            <div class="labeled-range">
+              <span class="range-label">10</span>
+              <input
+                type="range"
+                id="range-channels"
+                name="channels"
+                value="10"
+                min="10"
+                max="25"
+              />
+              <span class="range-label">25</span>
+            </div>
           </div>
-          <h4>Channels:</h4>
-          <div>
-            <ul id="channels-list"></ul>
+      
+          <div class="toolbar-item slider">
+            <label id="label-period" for="period"
+              >Sleep period (h): 8</label
+            >
+            <div class="labeled-range">
+              <span class="range-label">8</span>
+              <input
+                type="range"
+                id="range-period"
+                name="period"
+                value="8"
+                min="8"
+                max="14"
+              />
+              <span class="range-label">14</span>
+            </div>
           </div>
-        </div>
-      </fieldset>
+      
+          <div class="toolbar-item slider">
+            <label id="label-samples" for="samples"
+              >Samples per second: 1</label
+            >
+            <div class="labeled-range">
+              <span class="range-label">1</span>
+              <input
+                type="range"
+                id="range-samples"
+                name="samples"
+                value="1"
+                min="1"
+                max="100"
+              />
+              <span class="range-label">100</span>
+            </div>
+          </div>
+      
+          <div id="renderers">
+            <h3>Available renderers:</h3>
+          </div>
+      
+          <div id="extra-features">
+            <h3>Extra features:</h3>
+            <div id="extra-features-controls">
+              <label><input id="xf-toggle-grid" type="checkbox" />Toggle grid behind
+                graphs</label>
+              <label><input id="xf-area-zoom" type="checkbox" />Toggle area zoom</label>
+              <button id="xf-save-montage" class="button small">
+                Save current view as montage
+              </button>
+            </div>
+            <h4>Channels:</h4>
+            <div>
+              <ul id="channels-list"></ul>
+            </div>
+          </div>  </div>
+        <ul id="montages-list"></ul></fieldset>
       <div id="chart"></div>
     </main>
     
