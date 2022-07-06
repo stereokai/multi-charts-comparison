@@ -1571,10 +1571,6 @@ packages:
     engines: { node: ">=8.6" }
     dev: true
 
-  /plotly.js-dist/2.12.1:
-    resolution: {integrity: sha512-u3NumBhoNQw5fyr5sfK0jTIa4v1WwruAs0y5bSk055rKklFtyUgwwVZ8VEKCiWqfuPX7OPS3mE4PqvgP4mATOA==}
-    dev: false
-
   /postcss/8.4.12:
     resolution:
       {
