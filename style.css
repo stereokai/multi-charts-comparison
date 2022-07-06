@@ -17,11 +17,16 @@ body {
 
 #toolbar {
   display: flex;
-  flex-direction: column;
   overflow-y: auto;
-  text-align: center;
+  overflow-x: hidden;
   border: none;
-  padding-left: 1rem;
+  padding: 0 1rem;
+}
+
+.toolbar-main {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
   row-gap: 1rem;
 }
 
@@ -257,4 +262,25 @@ h4 {
 .channels-list-item > label > svg.smaller > use {
   transform: scale(0.7);
   transform-origin: center;
+}
+
+#montages {
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding-top: 1rem;
+  padding-left: 1rem;
+}
+
+#montages > li {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  margin: auto auto 0.5rem;
+  padding: 0px;
+  width: 60px;
+  height: 60px;
+  font-size: 0.8rem;
+  border-radius: 1rem;
 }

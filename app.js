@@ -1,12 +1,16 @@
 import * as graphs from "@/Graphs/Graphs.js";
 import { default as app } from "@/models/ui.js";
 import channelListItem from "@/partials/channel-list-item.hbs?raw";
+import montages from "@/partials/montages.hbs?raw";
 import { hasAllFeatures, RENDERERS } from "@/router.js";
 import { debounce } from "@/utils.js";
 import Handlebars from "handlebars";
 import { channels } from "./models/state.js";
 
+Handlebars.registerHelper("inc", (value) => parseInt(value) + 1);
+
 let channelListItemTemplate;
+let montagesTemplate;
 let channelList;
 const labels = {};
 const FRIENDLY_NAMES = {
@@ -136,6 +140,8 @@ function buildRenderers(renderers) {
 
 function buildExtraFeatures() {
   channelListItemTemplate = Handlebars.compile(channelListItem);
+  montagesTemplate = Handlebars.compile(montages);
+
   const xfToggleGrid = document.querySelector("#xf-toggle-grid");
   xfToggleGrid.checked = app.extraFeatures.toggleGrid;
   xfToggleGrid.addEventListener("change", (event) => {
@@ -151,6 +157,7 @@ function buildExtraFeatures() {
   const xfSaveMontage = document.querySelector("#xf-save-montage");
   xfSaveMontage.addEventListener("click", (event) => {
     app.extraFeatures.montages.push(graphs.api.newMontage());
+    buildMontageList();
   });
 
   const xfLoadMontage = document.querySelector("#xf-load-montage");
@@ -196,16 +203,21 @@ function buildChannelList() {
   }
 
   channelList.innerHTML = channelListItemTemplate({ channels });
+}
 
-  // // add event listeners to each channel
-  // const channelLinks = document.querySelectorAll("#channels-list li");
-  // channelLinks.forEach((link) => {
-  //   link.addEventListener("click", (event) => {
-  //     const channel = event.target.innerHTML;
-  //     graphs.api.toggleChannel(channel);
-  //   }
-  //   );
-  // });
+function buildMontageList() {
+  const montages = document.getElementById("montages");
+  const montagesHTML = montagesTemplate({
+    montages: app.extraFeatures.montages,
+  });
+
+  if (montages) {
+    montages.outerHTML = montagesHTML;
+  } else {
+    document
+      .getElementById("toolbar")
+      .insertAdjacentHTML("beforeend", montagesHTML);
+  }
 }
 
 function initExtraFeatures() {}
