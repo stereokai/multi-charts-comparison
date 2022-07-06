@@ -1,8 +1,13 @@
 import * as graphs from "@/Graphs/Graphs.js";
 import { default as app } from "@/models/ui.js";
-import { RENDERERS } from "@/router.js";
+import channelListItem from "@/partials/channel-list-item.hbs?raw";
+import { hasAllFeatures, RENDERERS } from "@/router.js";
 import { debounce } from "@/utils.js";
+import Handlebars from "handlebars";
+import { channels } from "./models/state.js";
 
+let channelListItemTemplate;
+let channelList;
 const labels = {};
 const FRIENDLY_NAMES = {
   [graphs.EVENTS.init]: "First render",
@@ -12,6 +17,7 @@ const FRIENDLY_NAMES = {
 
 function init() {
   const renderers = document.querySelector("#renderers");
+  const extraFeatures = document.querySelector("#extra-features");
   labels.channels = document.querySelector("#label-channels");
   labels.period = document.querySelector("#label-period");
   labels.samples = document.querySelector("#label-samples");
@@ -21,14 +27,16 @@ function init() {
   labels.chartHeader = document.querySelector("#chart-header");
 
   labels.chartHeader.innerHTML = graphs.renderer;
-  RENDERERS.forEach((renderer) => {
-    const link = document.createElement("a");
-    link.href = "#" + renderer.toLowerCase();
-    link.innerHTML = renderer;
-    link.className = "button";
-    link.className += renderer === graphs.renderer ? " on" : "";
-    renderers.appendChild(link);
-  });
+
+  if (!hasAllFeatures) {
+    extraFeatures.parentElement.removeChild(extraFeatures);
+    renderers.classList.add("show");
+    buildRenderers(renderers);
+  } else {
+    renderers.parentElement.removeChild(renderers);
+    extraFeatures.classList.add("show");
+    buildExtraFeatures(extraFeatures);
+  }
 
   updateTotalSamples();
   Object.keys(graphs.EVENTS).forEach((event) => {
@@ -79,6 +87,7 @@ function onSliderChange(event) {
   app[name].value = value;
   updateTotalSamples();
   updateGraphSettings();
+  hasAllFeatures && buildChannelList();
 }
 
 function onGraphEvent(graphEvent) {
@@ -92,6 +101,7 @@ function onGraphEvent(graphEvent) {
   }
   if (graphEvent.type === graphs.EVENTS.dataOperationEnd) {
     labels.chartHeader.classList.remove("show-loader");
+    hasAllFeatures && buildChannelList();
     return;
   }
 
@@ -104,6 +114,7 @@ function onGraphEvent(graphEvent) {
     }, 1000);
   });
 }
+
 if (document.readyState == "complete" || document.readyState == "interactive") {
   init();
 } else {
@@ -111,3 +122,77 @@ if (document.readyState == "complete" || document.readyState == "interactive") {
     init();
   });
 }
+
+function buildRenderers(renderers) {
+  RENDERERS.forEach((renderer) => {
+    const link = document.createElement("a");
+    link.href = "#" + renderer.toLowerCase();
+    link.innerHTML = renderer;
+    link.className = "button";
+    link.className += renderer === graphs.renderer ? " on" : "";
+    renderers.appendChild(link);
+  });
+}
+
+function buildExtraFeatures() {
+  channelListItemTemplate = Handlebars.compile(channelListItem);
+  const xfToggleGrid = document.querySelector("#xf-toggle-grid");
+  xfToggleGrid.checked = app.extraFeatures.toggleGrid;
+  xfToggleGrid.addEventListener("change", (event) => {
+    graphs.api.toggleGrid(event.target.checked);
+  });
+
+  const xfAreaZoom = document.querySelector("#xf-area-zoom");
+  xfAreaZoom.checked = app.extraFeatures.areaZoom;
+  xfAreaZoom.addEventListener("change", (event) => {
+    graphs.api.toggleAreaZoom(event.target.checked);
+  });
+
+  channelList = document.querySelector("#channels-list");
+
+  channelList.addEventListener("click", (e) => {
+    if (e.target.tagName !== "INPUT") return;
+
+    const target = e.path.find((el) => el.classList.contains("target"));
+    const channelIndex = target.getAttribute("channel-index") | 0;
+
+    if (target.classList.contains("toggle-channel")) {
+      channels[channelIndex].isHidden = !channels[channelIndex].isHidden;
+      graphs.api.toggleChannelVisibility(channelIndex);
+      return;
+    }
+
+    if (target.classList.contains("pin-channel")) {
+      channels[channelIndex].isSticky = !channels[channelIndex].isSticky;
+      graphs.api.toggleChannelSticky(channelIndex);
+      return;
+    }
+  });
+
+  buildChannelList();
+}
+
+function buildChannelList() {
+  // build unordered list of channels and append to #channels-list
+
+  if (channelList.childElementCount > app.channels.value) {
+    while (channelList.childElementCount > app.channels.value) {
+      channelList.removeChild(channelList.lastChild);
+    }
+    return;
+  }
+
+  channelList.innerHTML = channelListItemTemplate({ channels });
+
+  // // add event listeners to each channel
+  // const channelLinks = document.querySelectorAll("#channels-list li");
+  // channelLinks.forEach((link) => {
+  //   link.addEventListener("click", (event) => {
+  //     const channel = event.target.innerHTML;
+  //     graphs.api.toggleChannel(channel);
+  //   }
+  //   );
+  // });
+}
+
+function initExtraFeatures() {}

@@ -48,10 +48,10 @@ export function buildModel(incomingDataset, timeSeries) {
   const outgoingDataset = {};
 
   for (let i = 0; i < incomingDataset.length; i++) {
-    const channelNumber = channels.length - incomingDataset.length + i;
+    const channelIndex = channels.length - incomingDataset.length + i;
     const channel = incomingDataset[i];
 
-    outgoingDataset[`channel_${channelNumber}`] = channel.data;
+    outgoingDataset[`channel_${channelIndex}`] = channel.data;
   }
 
   if (incomingDataset.length === channels.length) {

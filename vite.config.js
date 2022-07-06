@@ -8,6 +8,7 @@ import jscc from "rollup-plugin-jscc";
 import { defineConfig } from "vite";
 import dynamicImport from "vite-plugin-dynamic-import";
 import handlebars from "vite-plugin-handlebars";
+import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 import { default as toolbarConfiguration } from "./models/ui.js";
 import { aliasesForVite } from "./pathbroker.mjs";
 const require = createRequire(import.meta.url);
@@ -92,6 +93,10 @@ export default defineConfig({
     }),
     replace(replaceRules),
     jscc(jsccRules),
+    createSvgIconsPlugin({
+      iconDirs: [resolve(__dirname, "assets/icons")],
+      symbolId: "icon-[name]",
+    }),
     handlebars({
       context: {
         toolbar: toolbarConfiguration,

@@ -18,6 +18,7 @@ body {
 #toolbar {
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
   text-align: center;
   border: none;
   padding-left: 1rem;
@@ -76,8 +77,20 @@ body {
   text-decoration: none;
 }
 
+.button:hover {
+  background: #03a9f4;
+}
+
 .button.on {
   background: #03a9f4;
+}
+
+#renderers {
+  display: none;
+}
+
+#renderers.show {
+  display: block;
 }
 
 #renderers > .button {
@@ -152,4 +165,89 @@ body {
   to {
     background: transparent;
   }
+}
+
+#extra-features {
+  display: none;
+}
+
+#extra-features.show {
+  display: block;
+}
+
+#extra-features > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+input[type="checkbox"] {
+  margin: 0 0.5rem 0 0;
+}
+
+h4 {
+  margin: 1rem auto 0;
+  font-size: 1.17em;
+}
+
+#channels-list {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: stretch;
+  text-align: start;
+}
+
+.channels-list-item {
+  display: flex;
+  align-items: center;
+}
+
+.channels-list-item > label {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: white;
+  position: relative;
+  top: -2px;
+  margin-right: 0.3rem;
+}
+
+.channels-list-item > label > input {
+  visibility: hidden;
+  position: absolute;
+}
+
+.channels-list-item > label > svg {
+  width: 1rem;
+  height: 1rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #0075ff;
+}
+.channels-list-item > label > svg:hover {
+  background: #03a9f4;
+}
+.channels-list-item > label > svg.checked {
+  visibility: hidden;
+}
+.channels-list-item > label > input:checked + svg {
+  background: #03a9f4;
+}
+.channels-list-item > label > input:checked ~ svg.checked {
+  visibility: visible;
+}
+.channels-list-item > label > input:checked + svg.unchecked {
+  visibility: hidden;
+}
+.channels-list-item > label > input:checked + svg.rotate {
+  transform: rotate(90deg);
+}
+.channels-list-item > label > svg.smaller > use {
+  transform: scale(0.7);
+  transform-origin: center;
 }

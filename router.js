@@ -1,9 +1,17 @@
+let hash = location.hash.substring(1).toLowerCase();
+const allFeaturesFlag = "+extrafeatures";
+
+export const hasAllFeatures = hash.lastIndexOf(allFeaturesFlag) > -1;
+
 export const RENDERERS = [
   //#RENDERERS
 ];
 
-let hash = location.hash.substring(1).toLowerCase();
-console.log(hash);
+hash = hash.substring(
+  0,
+  hasAllFeatures ? hash.lastIndexOf(allFeaturesFlag) : hash.length
+);
+
 export const renderer = RENDERERS.find(
   (renderer) => renderer.toLowerCase() === hash
 );

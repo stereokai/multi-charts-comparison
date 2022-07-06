@@ -23,5 +23,9 @@ const uiModel = {
   lastEvent: {
     label: "Last event",
   },
+  extraFeatures: {
+    toggleGrid: true,
+    areaZoom: false,
+  },
 };
 export default uiModel;

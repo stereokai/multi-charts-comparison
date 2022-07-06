@@ -16,7 +16,7 @@ let prevSamplesPerSecond = 0;
 let timeSeries;
 
 export function on(...args) {
-  chart.on(...args);
+  (chart.on || chart.graphEvents.on)(...args);
 }
 
 export function initGraph(container, samplesPerChannel, samplesPerSecond) {
@@ -24,6 +24,16 @@ export function initGraph(container, samplesPerChannel, samplesPerSecond) {
   chart.init(container);
   chart.graphEvents.dataOperationStarted();
   setChartData(() => regenerateAllChannels(samplesPerChannel));
+}
+
+function updateInteralState(dataset) {
+  for (let i = 0; i < dataset.length; i++) {
+    const channelIndex = channels.length - dataset.length + i;
+    const channelData = dataset[i];
+
+    channels[channelIndex].min = channelData.min;
+    channels[channelIndex].max = channelData.max;
+  }
 }
 
 function updateChart(dataset) {
@@ -35,9 +45,9 @@ function setChartData(dataOperation) {
   dataOperation()
     .then((dataset) => {
       chart.graphEvents.dataOperationEnded();
-      return dataset;
+      updateInteralState(dataset);
+      updateChart(dataset);
     })
-    .then(updateChart)
     .catch((err) => {
       console.log("Operation error", err);
     })
@@ -106,3 +116,5 @@ export function onSettingChange(
 
   setChartData(operation);
 }
+
+export const { api } = chart;
