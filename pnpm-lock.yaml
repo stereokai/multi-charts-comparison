@@ -5,7 +5,6 @@ specifiers:
   '@rollup/plugin-replace': ~4.0.0
   cross-env: ^7.0.3
   echarts: ~5.3.1
-  highcharts: ~10.1.0
   rollup: ~2.70.1
   rollup-plugin-copy-merge: ~0.2.0
   rollup-plugin-jscc: ~2.0.0
@@ -20,7 +19,6 @@ specifiers:
 dependencies:
   '@arction/lcjs': 3.4.0
   echarts: 5.3.2
-  highcharts: 10.1.0
   sanitize.css: 13.0.0
   stats.js: 0.17.0
   uplot: 1.6.20
@@ -519,10 +517,6 @@ packages:
     dependencies:
       function-bind: 1.1.1
     dev: true
-
-  /highcharts/10.1.0:
-    resolution: {integrity: sha512-gW/pzy/Qy/hiYeCflYHpwgsP2nqQavwuRUswRf+papmbutZ3I7K7AIZJ/yZ9NL5yzpF7X7r2dX7/nzZGN4A1rg==}
-    dev: false
 
   /ignore/5.2.0:
     resolution: {integrity: sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==}
