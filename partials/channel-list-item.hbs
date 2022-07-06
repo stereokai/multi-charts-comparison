@@ -15,6 +15,12 @@
         <use href="#icon-pin" fill="#fff"></use>
       </svg>
     </label>
+    <label class="target group-channel" channel-index="{{@index}}">
+      <input type="checkbox" {{#if isGrouped}}checked{{/if}} />
+      <svg aria-hidden="true" class="smaller">
+        <use href="#icon-combine" fill="#fff" ></use>
+      </svg>
+    </label>
     <span class="channel-name">{{name}}</span>
   </li>
 {{/each}}

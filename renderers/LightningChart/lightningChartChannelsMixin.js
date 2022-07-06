@@ -9,7 +9,13 @@ import {
 
 const lightningChartChannelsMixin = (Base) =>
   class LightningChartChannelsMixin extends Base {
-    static addChannel(dashboard, channel, channelIndex, colorIndex) {
+    static addChannel(
+      dashboard,
+      channel,
+      channelIndex,
+      colorIndex,
+      dontCreateSeries = false
+    ) {
       const chart = dashboard
         .createChartXY({
           columnIndex: 0,
@@ -65,28 +71,42 @@ const lightningChartChannelsMixin = (Base) =>
             )
         );
 
-      const series = chart
+      let series;
+      if (!dontCreateSeries) {
+        series = LightningChartChannelsMixin.addLineSeries(
+          chart,
+          typeof colorIndex === "number" ? colorIndex : channelIndex
+        );
+      }
+
+      return { chart, series, xAxis, yAxis, row: channelIndex };
+    }
+
+    static addLineSeries(chart, colorIndex = 0) {
+      return chart
         .addLineSeries({
           dataPattern: {
             pattern: "ProgressiveX",
             regularProgressiveStep: true,
             allowDataGrouping: true,
           },
-          automaticColorIndex:
-            typeof colorIndex === "number" ? colorIndex : channelIndex,
+          automaticColorIndex: colorIndex,
         })
         .setStrokeStyle((solidLine) => solidLine.setThickness(-1));
-
-      return { chart, series, xAxis, yAxis, row: channelIndex };
     }
 
-    addChannel(channel, channelIndex, colorIndex) {
+    addChannel(channel, channelIndex, colorIndex, dontCreateSeries) {
       return LightningChartChannelsMixin.addChannel(
         this.dashboard,
         channel,
         channelIndex,
-        colorIndex
+        colorIndex,
+        dontCreateSeries
       );
+    }
+
+    addLineSeries(chart, colorIndex) {
+      return LightningChartChannelsMixin.addLineSeries(chart, colorIndex);
     }
 
     initializeChannels(channels) {

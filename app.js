@@ -193,6 +193,13 @@ function buildExtraFeatures() {
       unloadMontage();
       return;
     }
+
+    if (target.classList.contains("group-channel")) {
+      channels[channelIndex].isGrouped = !channels[channelIndex].isGrouped;
+      graphs.api.toggleChannelGrouped(channelIndex);
+      unloadMontage();
+      return;
+    }
   });
 
   montageList.addEventListener("click", (e) => {

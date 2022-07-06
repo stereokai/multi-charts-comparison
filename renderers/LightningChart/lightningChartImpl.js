@@ -20,13 +20,12 @@ export default class LightningChartImpl {
 
   constructor() {
     this.graphs = [];
-    this.pinnedGraphs = [];
   }
 
   init(container) {
     this.markEvent();
 
-    this.newDashboard(container, this.maxVisibleCharts);
+    this.newDashboard(container);
     this.initializeChannels(channels);
 
     // Prevent native wheel zoom (interferes with max zoom limitation)

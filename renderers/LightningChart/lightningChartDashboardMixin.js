@@ -44,7 +44,20 @@ const lightningChartDashboardMixin = (Base) =>
         .setSplitterStyleHighlight(emptyLine);
     }
 
-    newDashboard(container, numberOfRows) {
+    get maxVisibleCharts() {
+      return super.maxVisibleCharts * 2 + 1; // max channels + pin option per channel + 1 channel group
+    }
+
+    get mainGraph() {
+      return this.graphGroup || super.mainGraph;
+    }
+
+    constructor(...args) {
+      super(...args);
+      this.pinnedGraphs = [];
+    }
+
+    newDashboard(container, numberOfRows = this.maxVisibleCharts) {
       this.dashboard = LightningChartDashboard.getNewDashboard(
         container,
         numberOfRows
@@ -59,6 +72,10 @@ const lightningChartDashboardMixin = (Base) =>
       const visibleGraphs = graphs
         .map((g, i) => i)
         .filter((i) => !channels[i].isHidden);
+
+      if (mainGraph.isGroup) {
+        visibleGraphs.push(mainGraph.graphIndex);
+      }
 
       const visiblePinnedGraphs = pinnedGraphs.map((g) => g.pinnedIndex);
 
@@ -106,9 +123,12 @@ const lightningChartDashboardMixin = (Base) =>
 
     syncXAxesZoom() {
       this.axisSyncHandle && this.axisSyncHandle.remove();
-      this.axisSyncHandle = synchronizeAxisIntervals(
-        ...this.graphs.map((ch) => ch.xAxis)
-      );
+      const axes = this.graphs.map((ch) => ch.xAxis);
+      if (this.mainGraph.isGroup) {
+        axes.push(this.mainGraph.xAxis);
+      }
+
+      this.axisSyncHandle = synchronizeAxisIntervals(...axes);
     }
 
     resetView() {
@@ -197,12 +217,74 @@ const lightningChartDashboardMixin = (Base) =>
       }
     }
 
+    addGraphGroup() {
+      const graphIndex = Math.floor(this.maxVisibleCharts / 2);
+      this.graphGroup = this.addChannel(
+        { name: "Channel Group" },
+        graphIndex,
+        null,
+        true
+      );
+      this.graphGroup.isGroup = true;
+      this.graphGroup.graphIndex = graphIndex;
+      this.graphGroup.series = {};
+    }
+
+    toggleChannelGrouped(channelIndex, dontRender = false) {
+      if (channels[channelIndex].isGrouped) {
+        if (!this.mainGraph.isGroup) {
+          this.addGraphGroup();
+        }
+
+        const { graphs, mainGraph } = this;
+        const graph = graphs[channelIndex];
+
+        const series = this.addLineSeries(mainGraph.chart, channelIndex);
+        mainGraph.series[channelIndex] = series;
+
+        series.add(graph.series.kc[0].La);
+      } else {
+        if (!this.mainGraph.isGroup) {
+          return;
+        }
+
+        const { mainGraph } = this;
+        const series = mainGraph.series[channelIndex];
+
+        if (!series) {
+          return;
+        }
+
+        series.dispose();
+        mainGraph.series[channelIndex] = null;
+        delete mainGraph.series[channelIndex];
+
+        if (Object.keys(mainGraph.series).length === 0) {
+          mainGraph.chart.dispose();
+          for (let key in mainGraph) {
+            mainGraph[key] = null;
+          }
+
+          this.graphGroup = null;
+        }
+      }
+
+      if (!dontRender) {
+        this.setXAxisStyle();
+        this.syncXAxesZoom();
+        requestAnimationFrame(() => {
+          this.updateDashboardRowHeights();
+        });
+      }
+    }
+
     newMontage() {
       return channels.map((channel, i) => {
         return {
           channelIndex: i,
           isHidden: channel.isHidden,
           isSticky: channel.isSticky,
+          isGrouped: channel.isGrouped,
           pinnedGraphIndex:
             channel.pinnedGraph && channel.pinnedGraph.pinnedIndex,
         };
@@ -217,12 +299,22 @@ const lightningChartDashboardMixin = (Base) =>
         }
       });
 
+      if (this.mainGraph.isGroup) {
+        this.graphGroup.chart.dispose();
+        for (let key in this.mainGraph) {
+          this.mainGraph[key] = null;
+        }
+        this.graphGroup = null;
+      }
+
       montage.forEach((channel, channelIndex) => {
         channels[channelIndex].isHidden = channel.isHidden;
         channels[channelIndex].isSticky = channel.isSticky;
+        channels[channelIndex].isGrouped = channel.isGrouped;
 
         this.toggleChannelVisibility(channelIndex, true);
         this.toggleChannelSticky(channelIndex, true, channel.pinnedGraphIndex);
+        this.toggleChannelGrouped(channelIndex);
       });
 
       this.updateDashboardRowHeights();
