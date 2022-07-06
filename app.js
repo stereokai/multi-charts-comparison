@@ -11,7 +11,6 @@ const FRIENDLY_NAMES = {
 };
 
 function init() {
-  const toolbar = document.getElementById("toolbar");
   const renderers = document.querySelector("#renderers");
   labels.channels = document.querySelector("#label-channels");
   labels.period = document.querySelector("#label-period");

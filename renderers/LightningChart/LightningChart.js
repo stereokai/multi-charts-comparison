@@ -138,15 +138,8 @@ function updateTimeSeries(timeSeries) {
   getBottomGraph().xAxis.setTickStrategy(AxisTickStrategies.DateTime, (ticks) =>
     ticks
       .setDateOrigin(new Date(getBaseDate()))
-      // .setGreatTickStyle((great) => {
-      //   return great.setLabelAlignment(0).setTickStyle(emptyLine);
-      // })
-      .setMajorTickStyle((major) =>
-        major.setGridStrokeStyle(emptyLine).setTickStyle(emptyLine)
-      )
-      .setMinorTickStyle((minor) =>
-        minor.setGridStrokeStyle(emptyLine).setTickStyle(emptyLine)
-      )
+      .setMajorTickStyle((major) => major.setGridStrokeStyle(emptyLine))
+      .setMinorTickStyle((minor) => minor.setGridStrokeStyle(emptyLine))
   );
 
   if (timeSeries) {
@@ -167,7 +160,6 @@ function addChannel(dashboard, channel, channelIndex) {
     .setTitle("")
     .setPadding({ left: 100, top: 0, bottom: 0 })
     .setBackgroundStrokeStyle(emptyLine)
-    .setMouseInteractionWheelZoom(false)
     .setSeriesBackgroundFillStyle(
       new SolidFill({
         color: ColorCSS("white"),
@@ -191,18 +183,12 @@ function addChannel(dashboard, channel, channelIndex) {
     .setThickness(60)
     .setAnimationZoom(undefined)
     .setTickStrategy(AxisTickStrategies.Numeric, (tickStrategy) =>
-      tickStrategy
-        .setMajorTickStyle((visibleTicks) => {
-          return visibleTicks
-            .setLabelFillStyle(new SolidFill({ color: ColorHEX("#6e7079") }))
-            .setLabelFont(new FontSettings({ size: 6 }))
-            .setTickStyle(emptyLine);
-        })
-        .setMinorTickStyle((visibleTicks) =>
-          visibleTicks
-            .setLabelFont(new FontSettings({ size: 6 }))
-            .setTickStyle(emptyLine)
-        )
+      tickStrategy.setMajorTickStyle((visibleTicks) => {
+        return visibleTicks
+          .setLabelFillStyle(new SolidFill({ color: ColorHEX("#6e7079") }))
+          .setLabelFont(new FontSettings({ size: 8 }))
+          .setTickStyle(false);
+      })
     );
 
   const series = chart
@@ -220,39 +206,26 @@ function addChannel(dashboard, channel, channelIndex) {
 }
 
 function registerZoomEvents(container) {
-  // graphs[0].xAxis.onScaleChange((start, end) => {
-  //   // Prevent zomming out more than full graph width
-  //   if (start < minX || end > maxX) {
-  //     requestAnimationFrame(() => {
-  //       graphs.forEach((graph) =>
-  //         graph.chart.setMouseInteractionWheelZoom(false)
-  //       );
-  //       getBottomGraph().xAxis.setInterval(minX, maxX, false, true);
-  //       setTimeout(() => {
-  //         graphs.forEach((graph) =>
-  //           graph.chart.setMouseInteractionWheelZoom(true)
-  //         );
-  //       }, 1000);
-  //     });
-  //   }
+  graphs[0].xAxis.onScaleChange((start, end) => {
+    // Prevent zomming out more than full graph width
+    if (start < minX || end > maxX) {
+      requestAnimationFrame(() => {
+        graphs.forEach((graph) =>
+          graph.chart.setMouseInteractionWheelZoom(false)
+        );
+        getBottomGraph().xAxis.setInterval(minX, maxX, false, true);
+        setTimeout(() => {
+          graphs.forEach((graph) =>
+            graph.chart.setMouseInteractionWheelZoom(true)
+          );
+        }, 1000);
+      });
+    }
 
-  graphs.forEach((graph) => {
-    graph.chart.onSeriesBackgroundMouseWheel((_, event) => {
-      const { deltaY } = event;
-      const { xAxis, yAxis } = graph;
-      const { start, end } = xAxis.getInterval();
-      console.log(deltaY);
-      xAxis.setInterval(
-        start + deltaY * 10000,
-        end - deltaY * 10000,
-        false,
-        true
-      );
-    });
     // Prevent Y axis zoom (Keep full scale of Y axis at all times)
-    // graphs.forEach((graph, i) => {
-    //   graph.yAxis.setInterval(channels[i].min, channels[i].max);
-    // });
+    graphs.forEach((graph, i) => {
+      graph.yAxis.setInterval(channels[i].min, channels[i].max);
+    });
   });
 
   // Prevent native wheel zoom (interferes with max zoom limitation)
