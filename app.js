@@ -148,6 +148,19 @@ function buildExtraFeatures() {
     graphs.api.toggleAreaZoom(event.target.checked);
   });
 
+  const xfSaveMontage = document.querySelector("#xf-save-montage");
+  xfSaveMontage.addEventListener("click", (event) => {
+    app.extraFeatures.montages.push(graphs.api.newMontage());
+  });
+
+  const xfLoadMontage = document.querySelector("#xf-load-montage");
+  xfLoadMontage.addEventListener("click", (event) => {
+    graphs.api.loadMontage(
+      app.extraFeatures.montages[app.extraFeatures.montages.length - 1]
+    );
+    buildChannelList();
+  });
+
   channelList = document.querySelector("#channels-list");
 
   channelList.addEventListener("click", (e) => {

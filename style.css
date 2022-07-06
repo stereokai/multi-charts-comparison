@@ -75,6 +75,7 @@ body {
   color: white;
   border-radius: 2rem;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .button:hover {
@@ -83,6 +84,12 @@ body {
 
 .button.on {
   background: #03a9f4;
+}
+
+.button.small {
+  padding: 0.1rem 0.5rem;
+  font-size: 0.9rem;
+  margin: 0.5rem auto;
 }
 
 #renderers {
