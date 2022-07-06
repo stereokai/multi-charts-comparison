@@ -1,0 +1,78 @@
+<fieldset id="toolbar">
+  <div class="toolbar-main">
+    <div class="toolbarItem">
+      <h1 id="chart-header"></h1>
+    </div>
+
+    <div class="toolbar-item">
+      <label id="label-total">{{toolbar.total.label}}:</label>
+      <span id="total-samples">0</span>
+    </div>
+
+    <div class="toolbar-item">
+      <label>{{toolbar.lastEvent.label}}: <span id="last-event"></span></label>
+      <span id="last-event-duration"></span>
+    </div>
+
+    <div class="toolbar-item slider">
+      <label id="label-channels" for="channels"
+        >{{toolbar.channels.label}}: {{toolbar.channels.value}}</label
+      >
+      <div class="labeled-range">
+        <span class="range-label">{{toolbar.channels.min}}</span>
+        <input
+          type="range"
+          id="range-channels"
+          name="channels"
+          value="{{toolbar.channels.value}}"
+          min="{{toolbar.channels.min}}"
+          max="{{toolbar.channels.max}}"
+        />
+        <span class="range-label">{{toolbar.channels.max}}</span>
+      </div>
+    </div>
+
+    <div class="toolbar-item slider">
+      <label id="label-period" for="period"
+        >{{toolbar.period.label}}: {{toolbar.period.value}}</label
+      >
+      <div class="labeled-range">
+        <span class="range-label">{{toolbar.period.min}}</span>
+        <input
+          type="range"
+          id="range-period"
+          name="period"
+          value="{{toolbar.period.value}}"
+          min="{{toolbar.period.min}}"
+          max="{{toolbar.period.max}}"
+        />
+        <span class="range-label">{{toolbar.period.max}}</span>
+      </div>
+    </div>
+
+    <div class="toolbar-item slider">
+      <label id="label-samples" for="samples"
+        >{{toolbar.samples.label}}: {{toolbar.samples.value}}</label
+      >
+      <div class="labeled-range">
+        <span class="range-label">{{toolbar.samples.min}}</span>
+        <input
+          type="range"
+          id="range-samples"
+          name="samples"
+          value="{{toolbar.samples.value}}"
+          min="{{toolbar.samples.min}}"
+          max="{{toolbar.samples.max}}"
+        />
+        <span class="range-label">{{toolbar.samples.max}}</span>
+      </div>
+    </div>
+
+    <div id="renderers">
+      <h3>Available renderers:</h3>
+    </div>
+
+    {{> extra-features }}
+  </div>
+  {{> montages }}
+</fieldset>

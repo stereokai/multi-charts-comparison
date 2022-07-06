@@ -1,13 +1,24 @@
 import * as graphs from "@/Graphs/Graphs.js";
 import { default as app } from "@/models/ui.js";
 import channelListItem from "@/partials/channel-list-item.hbs?raw";
+import montageListItem from "@/partials/montage-list-item.hbs?raw";
 import { hasAllFeatures, RENDERERS } from "@/router.js";
 import { debounce } from "@/utils.js";
 import Handlebars from "handlebars";
 import { channels } from "./models/state.js";
 
+Handlebars.registerHelper("inc", (value) => parseInt(value) + 1);
+Handlebars.registerHelper("ifeq", function (a, b, options) {
+  if (a == b) {
+    return options.fn(this);
+  }
+  return options.inverse(this);
+});
+
 let channelListItemTemplate;
+let montageListItemTemplate;
 let channelList;
+let montageList;
 const labels = {};
 const FRIENDLY_NAMES = {
   [graphs.EVENTS.init]: "First render",
@@ -136,6 +147,8 @@ function buildRenderers(renderers) {
 
 function buildExtraFeatures() {
   channelListItemTemplate = Handlebars.compile(channelListItem);
+  montageListItemTemplate = Handlebars.compile(montageListItem);
+
   const xfToggleGrid = document.querySelector("#xf-toggle-grid");
   xfToggleGrid.checked = app.extraFeatures.toggleGrid;
   xfToggleGrid.addEventListener("change", (event) => {
@@ -148,23 +161,55 @@ function buildExtraFeatures() {
     graphs.api.toggleAreaZoom(event.target.checked);
   });
 
+  const xfSaveMontage = document.querySelector("#xf-save-montage");
+  xfSaveMontage.addEventListener("click", (event) => {
+    setCurrentMontage(
+      app.extraFeatures.montages.push(graphs.api.newMontage()) - 1
+    );
+  });
+
   channelList = document.querySelector("#channels-list");
+  montageList = document.querySelector("#montages-list");
 
   channelList.addEventListener("click", (e) => {
-    if (e.target.tagName !== "INPUT") return;
+    if (e.target.tagName !== "INPUT") {
+      return;
+    }
 
     const target = e.path.find((el) => el.classList.contains("target"));
+
     const channelIndex = target.getAttribute("channel-index") | 0;
 
     if (target.classList.contains("toggle-channel")) {
       channels[channelIndex].isHidden = !channels[channelIndex].isHidden;
       graphs.api.toggleChannelVisibility(channelIndex);
+      unloadMontage();
       return;
     }
 
     if (target.classList.contains("pin-channel")) {
       channels[channelIndex].isSticky = !channels[channelIndex].isSticky;
       graphs.api.toggleChannelSticky(channelIndex);
+      unloadMontage();
+      return;
+    }
+  });
+
+  montageList.addEventListener("click", (e) => {
+    if (
+      e.path.find((el) => el.classList && el.classList.contains("close-button"))
+    ) {
+      const montageIndex = e.target.parentNode.getAttribute("montage");
+      app.extraFeatures.montages.splice(montageIndex | 0, 1);
+      buildMontageList();
+      return;
+    }
+
+    let montageIndex = e.target.getAttribute("montage");
+    if (montageIndex) {
+      const montage = app.extraFeatures.montages[montageIndex | 0];
+      montage && graphs.api.loadMontage(montage);
+      setCurrentMontage(montageIndex);
       return;
     }
   });
@@ -173,8 +218,6 @@ function buildExtraFeatures() {
 }
 
 function buildChannelList() {
-  // build unordered list of channels and append to #channels-list
-
   if (channelList.childElementCount > app.channels.value) {
     while (channelList.childElementCount > app.channels.value) {
       channelList.removeChild(channelList.lastChild);
@@ -183,16 +226,22 @@ function buildChannelList() {
   }
 
   channelList.innerHTML = channelListItemTemplate({ channels });
-
-  // // add event listeners to each channel
-  // const channelLinks = document.querySelectorAll("#channels-list li");
-  // channelLinks.forEach((link) => {
-  //   link.addEventListener("click", (event) => {
-  //     const channel = event.target.innerHTML;
-  //     graphs.api.toggleChannel(channel);
-  //   }
-  //   );
-  // });
 }
 
-function initExtraFeatures() {}
+function buildMontageList() {
+  montageList.innerHTML = montageListItemTemplate({
+    montages: app.extraFeatures.montages,
+    currentMontage: app.extraFeatures.currentMontage,
+  });
+}
+
+function setCurrentMontage(montageIndex) {
+  app.extraFeatures.currentMontage = montageIndex;
+  buildMontageList();
+  buildChannelList();
+}
+
+function unloadMontage() {
+  app.extraFeatures.currentMontage = null;
+  buildMontageList();
+}

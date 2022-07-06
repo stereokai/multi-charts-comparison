@@ -26,6 +26,7 @@ const uiModel = {
   extraFeatures: {
     toggleGrid: true,
     areaZoom: false,
+    montages: [],
   },
 };
 export default uiModel;

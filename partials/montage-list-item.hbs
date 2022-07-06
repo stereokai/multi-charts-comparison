@@ -1,0 +1,10 @@
+{{#each montages}}
+  <li montage="{{@index}}" class="button montage {{#ifeq @index ../currentMontage}}on{{/ifeq}} ">
+    Montage<br />{{inc @index}}
+    <div montage="{{@index}}" class="close-button">
+    <svg montage="{{@index}}" aria-hidden="true">
+      <use href="#icon-x" fill="#fff"></use>
+    </svg>
+    </div>
+  </li>
+{{/each}}

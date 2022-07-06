@@ -131,7 +131,7 @@ const lightningChartDashboardMixin = (Base) =>
       });
     }
 
-    toggleChannelVisibility(channelIndex) {
+    toggleChannelVisibility(channelIndex, dontRender = false) {
       const graph = this.graphs[channelIndex];
       const isHidden = channels[channelIndex].isHidden;
 
@@ -143,20 +143,27 @@ const lightningChartDashboardMixin = (Base) =>
         graph.yAxis.restore();
       }
 
-      this.updateDashboardRowHeights();
+      if (!dontRender) {
+        this.updateDashboardRowHeights();
+      }
     }
 
-    toggleChannelSticky(channelIndex) {
+    toggleChannelSticky(
+      channelIndex,
+      dontRender = false,
+      pinnedGraphIndex = NaN
+    ) {
       const { pinnedGraphs, graphs } = this;
 
       const graph = graphs[channelIndex];
       const channel = channels[channelIndex];
 
       if (channel.isSticky) {
-        const pinnedIndex =
-          (pinnedGraphs.length &&
-            pinnedGraphs[pinnedGraphs.length - 1].pinnedIndex - 1) ||
-          this.maxVisibleCharts - 1;
+        const pinnedIndex = !isNaN(pinnedGraphIndex)
+          ? pinnedGraphIndex
+          : (pinnedGraphs.length &&
+              pinnedGraphs[pinnedGraphs.length - 1].pinnedIndex - 1) ||
+            this.maxVisibleCharts - 1;
 
         const pinnedGraph = this.addChannel(
           channel,
@@ -164,12 +171,15 @@ const lightningChartDashboardMixin = (Base) =>
           channelIndex // Use same color as the channel
         );
 
-        pinnedGraph.isSticky = true;
         pinnedGraph.pinnedIndex = pinnedIndex;
         pinnedGraphs.push(pinnedGraph);
         pinnedGraph.series.add(graph.series.kc[0].La);
         channel.pinnedGraph = pinnedGraph;
       } else {
+        if (!channel.pinnedGraph) {
+          return;
+        }
+
         const pinnedGraph = channel.pinnedGraph;
         channel.pinnedGraph = null;
         pinnedGraphs
@@ -181,6 +191,39 @@ const lightningChartDashboardMixin = (Base) =>
             }
           });
       }
+
+      if (!dontRender) {
+        this.updateDashboardRowHeights();
+      }
+    }
+
+    newMontage() {
+      return channels.map((channel, i) => {
+        return {
+          channelIndex: i,
+          isHidden: channel.isHidden,
+          isSticky: channel.isSticky,
+          pinnedGraphIndex:
+            channel.pinnedGraph && channel.pinnedGraph.pinnedIndex,
+        };
+      });
+    }
+
+    loadMontage(montage) {
+      this.pinnedGraphs.splice(0).forEach((graph) => {
+        graph.chart.dispose();
+        for (let key in graph) {
+          graph[key] = null;
+        }
+      });
+
+      montage.forEach((channel, channelIndex) => {
+        channels[channelIndex].isHidden = channel.isHidden;
+        channels[channelIndex].isSticky = channel.isSticky;
+
+        this.toggleChannelVisibility(channelIndex, true);
+        this.toggleChannelSticky(channelIndex, true, channel.pinnedGraphIndex);
+      });
 
       this.updateDashboardRowHeights();
     }
