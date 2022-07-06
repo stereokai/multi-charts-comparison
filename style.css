@@ -81,6 +81,7 @@ body {
   border-radius: 2rem;
   text-decoration: none;
   cursor: pointer;
+  border: none;
 }
 
 .button:hover {
@@ -216,16 +217,19 @@ h4 {
   align-items: center;
 }
 
-.channels-list-item > label {
-  width: 1rem;
-  height: 1rem;
+.channels-list-item > label,
+.button.montage > .close-button {
+  width: 1.2rem;
+  height: 1.2rem;
   cursor: pointer;
   border: none;
   background: none;
   color: white;
   position: relative;
-  top: -2px;
+  top: -1px;
   margin-right: 0.3rem;
+  border-radius: 3px;
+  overflow: hidden;
 }
 
 .channels-list-item > label > input {
@@ -233,21 +237,23 @@ h4 {
   position: absolute;
 }
 
-.channels-list-item > label > svg {
-  width: 1rem;
-  height: 1rem;
+.channels-list-item > label > svg,
+.button.montage > .close-button > svg {
+  width: 1.2rem;
+  height: 1.2rem;
   position: absolute;
   top: 0;
   left: 0;
   background: #0075ff;
 }
-.channels-list-item > label > svg:hover {
+.channels-list-item > label > svg:hover,
+.button.montage > .close-button > svg:hover {
   background: #03a9f4;
 }
 .channels-list-item > label > svg.checked {
   visibility: hidden;
 }
-.channels-list-item > label > input:checked + svg {
+.channels-list-item > label > input:checked ~ svg {
   background: #03a9f4;
 }
 .channels-list-item > label > input:checked ~ svg.checked {
@@ -264,23 +270,38 @@ h4 {
   transform-origin: center;
 }
 
-#montages {
+#montages-list {
   position: sticky;
   top: 0;
   margin: 0;
   padding-top: 1rem;
-  padding-left: 1rem;
+  padding-left: 0;
 }
 
-#montages > li {
+#montages-list > li {
   display: flex;
   align-items: center;
   text-align: center;
   justify-content: center;
-  margin: auto auto 0.5rem;
+  margin: auto auto 0.5rem 1rem;
   padding: 0px;
   width: 60px;
   height: 60px;
   font-size: 0.8rem;
   border-radius: 1rem;
+}
+
+.button.montage {
+  position: relative;
+}
+
+.button.montage > .close-button {
+  display: none;
+  position: absolute;
+  top: -0.4rem;
+  right: -0.7rem;
+}
+
+.button.montage:hover > .close-button {
+  display: block;
 }
