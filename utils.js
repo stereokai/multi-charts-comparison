@@ -26,3 +26,7 @@ export function debounce(callback, limit) {
     }, limit);
   };
 }
+
+export function toPosixPath(address) {
+  return address.replace(/\\/g, "/");
+}
