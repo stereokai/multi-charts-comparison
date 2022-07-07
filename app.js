@@ -110,7 +110,10 @@ function onSliderChange(event) {
 
 function onGraphEvent(graphEvent) {
   console.log(
-    `Last event was ${graphEvent.type} and took ${graphEvent.duration}`
+    `Last event was ${graphEvent.type}` +
+      (graphEvent.duration
+        ? ` which took ${graphEvent.duration.toFixed(2)}s`
+        : "")
   );
 
   if (graphEvent.type === graphs.EVENTS.dataOperationStart) {
