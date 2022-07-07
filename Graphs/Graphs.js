@@ -1,7 +1,7 @@
 import {
   addChannels,
   channels,
-  regenerateAllChannels,
+  regenerateAllChannels as regenerateAllChannelsOperation,
   removeChannels,
 } from "@/models/state.js";
 import { renderer } from "@/router.js";
@@ -24,8 +24,7 @@ export function initGraph(container, samplesPerChannel, samplesPerSecond) {
   chart.init(container);
   chart.graphEvents.dataOperationStarted();
 
-  if (channels.length)
-    setChartData(() => regenerateAllChannels(samplesPerChannel));
+  if (channels.length) regenerateAllChannels(samplesPerChannel);
 }
 
 function updateInteralState(dataset) {
@@ -84,6 +83,12 @@ function generateTimeseries(
   return timestamps;
 }
 
+export function regenerateAllChannels(
+  samplesPerChannel = prevSamplesPerChannel
+) {
+  setChartData(() => regenerateAllChannelsOperation(samplesPerChannel));
+}
+
 export function onSettingChange(
   numberOfChannels,
   samplesPerSecond,
@@ -107,7 +112,7 @@ export function onSettingChange(
   ) {
     onTotalSamplesChange(samplesPerChannel, samplesPerSecond);
     chart.graphEvents.dataOperationStarted();
-    operation = () => regenerateAllChannels(samplesPerChannel);
+    operation = () => regenerateAllChannelsOperation(samplesPerChannel);
   }
 
   // Channels added

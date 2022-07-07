@@ -1,11 +1,10 @@
 import * as graphs from "@/Graphs/Graphs.js";
-import { default as app } from "@/models/ui.js";
 import channelListItem from "@/partials/channel-list-item.hbs?raw";
 import montageListItem from "@/partials/montage-list-item.hbs?raw";
 import { hasAllFeatures, RENDERERS } from "@/router.js";
 import { debounce } from "@/utils.js";
 import Handlebars from "handlebars";
-import { channels } from "./models/state.js";
+import { app, channels } from "./models/state.js";
 
 Handlebars.registerHelper("inc", (value) => parseInt(value) + 1);
 Handlebars.registerHelper("ifeq", function (a, b, options) {
@@ -175,6 +174,13 @@ function buildExtraFeatures() {
   xfAreaZoom.checked = app.extraFeatures.areaZoom;
   xfAreaZoom.addEventListener("change", (event) => {
     graphs.api.toggleAreaZoom(event.target.checked);
+  });
+
+  const xfExtrapolation = document.querySelector("#xf-extrapolation");
+  xfExtrapolation.checked = app.extraFeatures.extrapolation;
+  xfExtrapolation.addEventListener("change", (event) => {
+    app.extraFeatures.extrapolation = event.target.checked;
+    graphs.regenerateAllChannels();
   });
 
   const xfSaveMontage = document.querySelector("#xf-save-montage");

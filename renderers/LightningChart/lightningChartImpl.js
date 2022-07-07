@@ -1,5 +1,4 @@
-import { channels } from "@/models/state.js";
-import { default as app } from "@/models/ui.js";
+import { app, channels } from "@/models/state.js";
 
 export default class LightningChartImpl {
   get minX() {

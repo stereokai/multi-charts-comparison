@@ -1,5 +1,7 @@
 import { dataOperation } from "@/dataGenerator/AsyncDataGenerator.js";
+import { default as app } from "@/models/ui.js";
 import { getRandom } from "@/utils.js";
+export { default as app } from "@/models/ui.js";
 
 //#DATA_GENERATOR_TASKS
 
@@ -107,6 +109,14 @@ export const channels = [
 // name: "Channel 7"
 // smoothing: 0.3574907065906837
 
+function getTaskConfig(...args) {
+  if (!app.extraFeatures.extrapolation) {
+    return getDataTaskConfig(...args);
+  } else {
+    return getPunchedDataTaskConfig(...args);
+  }
+}
+
 function getRandomChannel(number) {
   return {
     name: "Channel " + number,
@@ -119,7 +129,7 @@ function getRandomChannel(number) {
 export function regenerateAllChannels(samplesPerChannel) {
   return dataOperation((queueTask) => {
     channels.forEach((channel) =>
-      queueTask(getPunchedDataTaskConfig(channel, samplesPerChannel))
+      queueTask(getTaskConfig(channel, samplesPerChannel))
     );
   });
 }
@@ -138,7 +148,7 @@ export function addChannels(
       const channelNumber = channels.length + 1;
       if (shouldGenerateData) {
         queueTask(
-          getPunchedDataTaskConfig(
+          getTaskConfig(
             channels[channels.push(getRandomChannel(channelNumber)) - 1],
             samplesPerChannel
           )
