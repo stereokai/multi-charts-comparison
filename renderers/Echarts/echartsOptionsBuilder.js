@@ -1,3 +1,5 @@
+import { getChannelYAxisBounds } from "@/models/state.js";
+
 const xAxisConfig = {
   type: "time",
   boundaryGap: false,
@@ -99,8 +101,7 @@ export function buildEchartsOptions(channels, dataset) {
     xAxis: channels.map((channel, i) => getXAxis(i)),
     yAxis: channels.map((channel, i) =>
       getYAxis(i, channel.name, {
-        min: channel.min,
-        max: channel.max,
+        ...getChannelYAxisBounds(channel),
         inverse: channel.inverse,
       })
     ),

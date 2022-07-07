@@ -23,7 +23,9 @@ export function initGraph(container, samplesPerChannel, samplesPerSecond) {
   onTotalSamplesChange(samplesPerChannel, samplesPerSecond);
   chart.init(container);
   chart.graphEvents.dataOperationStarted();
-  setChartData(() => regenerateAllChannels(samplesPerChannel));
+
+  if (channels.length)
+    setChartData(() => regenerateAllChannels(samplesPerChannel));
 }
 
 function updateInteralState(dataset) {
@@ -31,8 +33,8 @@ function updateInteralState(dataset) {
     const channelIndex = channels.length - dataset.length + i;
     const channelData = dataset[i];
 
-    channels[channelIndex].min = channelData.min;
-    channels[channelIndex].max = channelData.max;
+    channels[channelIndex].dataMin = channelData.dataMin;
+    channels[channelIndex].dataMax = channelData.dataMax;
   }
 }
 

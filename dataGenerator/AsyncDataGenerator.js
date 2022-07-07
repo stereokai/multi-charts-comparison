@@ -18,7 +18,11 @@ function queueTask(task) {
 }
 
 function clearQueue(operationId) {
-  console.log("Terminating operation", operationId);
+  console.log(
+    operationId
+      ? `Terminating operation: ${operationId}`
+      : "Clearing worker queue"
+  );
   rejecters[operationId] &&
     rejecters[operationId](`Operation ${operationId} terminated`);
   workerPool.terminate(true);
@@ -31,7 +35,9 @@ function newOperation(operationId) {
   return () => {
     return new Promise((resolve, reject) => {
       rejecters[operationId] = reject;
-      Promise.all(workQueue).then((results) => resolve(results));
+      Promise.all(workQueue)
+        .then((results) => resolve(results))
+        .catch(() => {});
     });
   };
 }

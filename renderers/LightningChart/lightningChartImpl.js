@@ -26,7 +26,6 @@ export default class LightningChartImpl {
     this.markEvent();
 
     this.newDashboard(container);
-    this.initializeChannels(channels);
 
     // Prevent native wheel zoom (interferes with max zoom limitation)
     container.addEventListener(
