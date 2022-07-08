@@ -30,3 +30,13 @@ export function debounce(callback, limit) {
 export function toPosixPath(address) {
   return address.replace(/\\/g, "/");
 }
+
+export const apiProxi = {
+  get: (target, prop, receiver) => {
+    if (target[prop] && typeof target[prop] === "function") {
+      return target[prop].bind(target);
+    } else {
+      throw new Error(`API doesn't exist: ${prop}`);
+    }
+  },
+};
