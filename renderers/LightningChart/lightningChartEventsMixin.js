@@ -99,7 +99,8 @@ const lightningChartEventsMixin = (Base) =>
                     .scale.x.getPixelSize();
 
                   const int = this.mainGraph.xAxis.getInterval();
-                  const startPixels = int.start / pixelSizeX - 160; // 160 left padding
+                  const startPixels =
+                    int.start / pixelSizeX - this.dashboardLeftOffset; // 160 left padding
 
                   this.mainGraph.xAxis.setInterval(
                     (startPixels + result.x) * pixelSizeX,

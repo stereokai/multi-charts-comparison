@@ -4,6 +4,7 @@ import montageListItem from "@/partials/montage-list-item.hbs?raw";
 import { hasAllFeatures, RENDERERS } from "@/router.js";
 import { debounce } from "@/utils.js";
 import Handlebars from "handlebars";
+import hotkeys from "hotkeys-js";
 import { app, channels } from "./models/state.js";
 
 Handlebars.registerHelper("inc", (value) => parseInt(value) + 1);
@@ -168,12 +169,14 @@ function buildExtraFeatures() {
   xfToggleGrid.checked = app.extraFeatures.toggleGrid;
   xfToggleGrid.addEventListener("change", (event) => {
     graphs.api.toggleGrid(event.target.checked);
+    event.target.blur();
   });
 
   const xfAreaZoom = document.querySelector("#xf-area-zoom");
   xfAreaZoom.checked = app.extraFeatures.areaZoom;
   xfAreaZoom.addEventListener("change", (event) => {
     graphs.api.toggleAreaZoom(event.target.checked);
+    event.target.blur();
   });
 
   const xfExtrapolation = document.querySelector("#xf-extrapolation");
@@ -181,6 +184,19 @@ function buildExtraFeatures() {
   xfExtrapolation.addEventListener("change", (event) => {
     app.extraFeatures.extrapolation = event.target.checked;
     graphs.regenerateAllChannels();
+    event.target.blur();
+  });
+
+  const xfToggleHotkeys = document.querySelector("#xf-toggle-hotkeys");
+  xfToggleHotkeys.checked = app.extraFeatures.toggleHotkeys;
+  xfToggleHotkeys.addEventListener("change", (event) => {
+    app.extraFeatures.toggleHotkeys = event.target.checked;
+    if (app.extraFeatures.toggleHotkeys) {
+      registerHotkeys();
+    } else {
+      unregisterHotkeys();
+    }
+    event.target.blur();
   });
 
   const xfSaveMontage = document.querySelector("#xf-save-montage");
@@ -273,4 +289,22 @@ function setCurrentMontage(montageIndex) {
 function unloadMontage() {
   app.extraFeatures.currentMontage = null;
   buildMontageList();
+}
+
+function registerHotkeys() {
+  if (app.extraFeatures.hotkeys) {
+    app.extraFeatures.hotkeys.forEach((hotkey) => {
+      hotkeys(hotkey.key, (event, handler) => {
+        // Prevent the default refresh event under WINDOWS system
+        event.preventDefault();
+        graphs.api[hotkey.action]();
+      });
+    });
+  }
+}
+
+function unregisterHotkeys() {
+  if (app.extraFeatures.hotkeys) {
+    app.extraFeatures.hotkeys.forEach((hotkey) => hotkeys.unbind(hotkey.key));
+  }
 }

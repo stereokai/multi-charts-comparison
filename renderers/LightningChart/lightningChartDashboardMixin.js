@@ -52,6 +52,10 @@ const lightningChartDashboardMixin = (Base) =>
       return this.graphGroup || super.mainGraph;
     }
 
+    get dashboardLeftOffset() {
+      return this.CHART_LEFT_PADDING + this.Y_AXIS_WIDTH;
+    }
+
     constructor(...args) {
       super(...args);
       this.pinnedGraphs = [];
@@ -342,6 +346,34 @@ const lightningChartDashboardMixin = (Base) =>
       });
 
       this.updateDashboardRowHeights();
+    }
+
+    panLeft() {
+      const { xAxis, series } = this.mainGraph;
+      const { minX } = this;
+      const { start, end } = xAxis.getInterval();
+      const pixelSizeX = series.scale.x.getPixelSize();
+      let distance = (start - end) / 4;
+
+      if (start + distance < minX) {
+        distance = minX - start;
+      }
+
+      xAxis.pan(distance / pixelSizeX);
+    }
+
+    panRight() {
+      const { xAxis, series } = this.mainGraph;
+      const { maxX } = this;
+      const { start, end } = xAxis.getInterval();
+      const pixelSizeX = series.scale.x.getPixelSize();
+      let distance = (end - start) / 4;
+
+      if (end + distance > maxX) {
+        distance = maxX - end;
+      }
+
+      xAxis.pan(distance / pixelSizeX);
     }
   };
 export default lightningChartDashboardMixin;
