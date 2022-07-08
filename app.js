@@ -1,11 +1,10 @@
 import * as graphs from "@/Graphs/Graphs.js";
-import { default as app } from "@/models/ui.js";
 import channelListItem from "@/partials/channel-list-item.hbs?raw";
 import montageListItem from "@/partials/montage-list-item.hbs?raw";
 import { hasAllFeatures, RENDERERS } from "@/router.js";
 import { debounce } from "@/utils.js";
 import Handlebars from "handlebars";
-import { channels } from "./models/state.js";
+import { app, channels } from "./models/state.js";
 
 Handlebars.registerHelper("inc", (value) => parseInt(value) + 1);
 Handlebars.registerHelper("ifeq", function (a, b, options) {
@@ -53,11 +52,16 @@ function init() {
   Object.keys(graphs.EVENTS).forEach((event) => {
     graphs.on(graphs.EVENTS[event], onGraphEvent);
   });
+
   graphs.initGraph(
     document.querySelector("#chart"),
     app.total.value / app.channels.value,
     app.samples.value
   );
+
+  if (!channels.length) {
+    updateGraphSettingsNow();
+  }
 
   const rangeChannels = document.querySelector("#range-channels");
   const rangePeriod = document.querySelector("#range-period");
@@ -83,13 +87,15 @@ function updateTotalSamples() {
   labels.total.innerHTML = Number(app.total.value).toLocaleString();
 }
 
-const updateGraphSettings = debounce(() => {
+function updateGraphSettingsNow() {
   graphs.onSettingChange(
     app.channels.value,
     app.samples.value,
     app.total.value
   );
-}, 150);
+}
+
+const updateGraphSettings = debounce(updateGraphSettingsNow, 150);
 
 function onSliderChange(event) {
   const { value } = event.target;
@@ -103,7 +109,10 @@ function onSliderChange(event) {
 
 function onGraphEvent(graphEvent) {
   console.log(
-    `Last event was ${graphEvent.type} and took ${graphEvent.duration}`
+    `Last event was ${graphEvent.type}` +
+      (graphEvent.duration
+        ? ` which took ${graphEvent.duration.toFixed(2)}s`
+        : "")
   );
 
   if (graphEvent.type === graphs.EVENTS.dataOperationStart) {
@@ -114,6 +123,12 @@ function onGraphEvent(graphEvent) {
     labels.chartHeader.classList.remove("show-loader");
     hasAllFeatures && buildChannelList();
     return;
+  }
+  if (graphEvent.type === graphs.EVENTS.init) {
+    if (app.channels.value > channels.length) {
+      updateGraphSettingsNow();
+    }
+    // return;
   }
 
   labels.lastEvent.innerHTML = FRIENDLY_NAMES[graphEvent.type];
@@ -159,6 +174,13 @@ function buildExtraFeatures() {
   xfAreaZoom.checked = app.extraFeatures.areaZoom;
   xfAreaZoom.addEventListener("change", (event) => {
     graphs.api.toggleAreaZoom(event.target.checked);
+  });
+
+  const xfExtrapolation = document.querySelector("#xf-extrapolation");
+  xfExtrapolation.checked = app.extraFeatures.extrapolation;
+  xfExtrapolation.addEventListener("change", (event) => {
+    app.extraFeatures.extrapolation = event.target.checked;
+    graphs.regenerateAllChannels();
   });
 
   const xfSaveMontage = document.querySelector("#xf-save-montage");

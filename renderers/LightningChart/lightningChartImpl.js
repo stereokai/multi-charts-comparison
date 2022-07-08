@@ -1,5 +1,4 @@
-import { channels } from "@/models/state.js";
-import { default as app } from "@/models/ui.js";
+import { app, channels } from "@/models/state.js";
 
 export default class LightningChartImpl {
   get minX() {
@@ -26,7 +25,6 @@ export default class LightningChartImpl {
     this.markEvent();
 
     this.newDashboard(container);
-    this.initializeChannels(channels);
 
     // Prevent native wheel zoom (interferes with max zoom limitation)
     container.addEventListener(

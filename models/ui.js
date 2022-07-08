@@ -27,6 +27,7 @@ const uiModel = {
     toggleGrid: true,
     areaZoom: false,
     montages: [],
+    extrapolation: false,
   },
 };
 export default uiModel;

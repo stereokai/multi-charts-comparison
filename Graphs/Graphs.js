@@ -1,7 +1,7 @@
 import {
   addChannels,
   channels,
-  regenerateAllChannels,
+  regenerateAllChannels as regenerateAllChannelsOperation,
   removeChannels,
 } from "@/models/state.js";
 import { renderer } from "@/router.js";
@@ -23,7 +23,8 @@ export function initGraph(container, samplesPerChannel, samplesPerSecond) {
   onTotalSamplesChange(samplesPerChannel, samplesPerSecond);
   chart.init(container);
   chart.graphEvents.dataOperationStarted();
-  setChartData(() => regenerateAllChannels(samplesPerChannel));
+
+  if (channels.length) regenerateAllChannels(samplesPerChannel);
 }
 
 function updateInteralState(dataset) {
@@ -31,8 +32,8 @@ function updateInteralState(dataset) {
     const channelIndex = channels.length - dataset.length + i;
     const channelData = dataset[i];
 
-    channels[channelIndex].min = channelData.min;
-    channels[channelIndex].max = channelData.max;
+    channels[channelIndex].dataMin = channelData.dataMin;
+    channels[channelIndex].dataMax = channelData.dataMax;
   }
 }
 
@@ -82,6 +83,12 @@ function generateTimeseries(
   return timestamps;
 }
 
+export function regenerateAllChannels(
+  samplesPerChannel = prevSamplesPerChannel
+) {
+  setChartData(() => regenerateAllChannelsOperation(samplesPerChannel));
+}
+
 export function onSettingChange(
   numberOfChannels,
   samplesPerSecond,
@@ -105,7 +112,7 @@ export function onSettingChange(
   ) {
     onTotalSamplesChange(samplesPerChannel, samplesPerSecond);
     chart.graphEvents.dataOperationStarted();
-    operation = () => regenerateAllChannels(samplesPerChannel);
+    operation = () => regenerateAllChannelsOperation(samplesPerChannel);
   }
 
   // Channels added

@@ -1,3 +1,4 @@
+import { getChannelYAxisBounds } from "@/models/state.js";
 import {
   AxisTickStrategies,
   ColorCSS,
@@ -43,12 +44,14 @@ const lightningChartChannelsMixin = (Base) =>
         )
         .setStrokeStyle(emptyLine);
 
+      const yAxisBounds = getChannelYAxisBounds(channel);
       const yAxis = chart
         .getDefaultAxisY()
         .setMouseInteractions(false)
         .setChartInteractions(false)
         .setStrokeStyle(emptyLine)
         .setTitle(channel.name)
+        .setInterval(yAxisBounds.min, yAxisBounds.max)
         .setTitleFont(new FontSettings({ size: 12 }))
         .setTitleFillStyle(new SolidFill({ color: ColorHEX("#6e7079") }))
         .setTitleRotation(0)
@@ -70,6 +73,10 @@ const lightningChartChannelsMixin = (Base) =>
                 .setTickStyle(emptyLine)
             )
         );
+
+      if (!channel.dynamicYAxis) {
+        yAxis.setScrollStrategy(undefined);
+      }
 
       let series;
       if (!dontCreateSeries) {
@@ -96,6 +103,7 @@ const lightningChartChannelsMixin = (Base) =>
     }
 
     addChannel(channel, channelIndex, colorIndex, dontCreateSeries) {
+      window.graphs = this.graphs;
       return LightningChartChannelsMixin.addChannel(
         this.dashboard,
         channel,
@@ -107,17 +115,6 @@ const lightningChartChannelsMixin = (Base) =>
 
     addLineSeries(chart, colorIndex) {
       return LightningChartChannelsMixin.addLineSeries(chart, colorIndex);
-    }
-
-    initializeChannels(channels) {
-      this.graphs.splice(
-        0,
-        0,
-        ...channels.map((channel, i) => {
-          return this.addChannel(channel, i);
-        })
-      );
-      this.graphs.forEach((graph) => this.registerZoomEvents(graph));
     }
   };
 export default lightningChartChannelsMixin;

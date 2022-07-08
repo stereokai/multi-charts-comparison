@@ -41,6 +41,7 @@ body {
 #chart {
   flex-grow: 1;
   /* margin: 0 auto; */
+  /* height: 3000px; */
 }
 
 .toolbar-item {
