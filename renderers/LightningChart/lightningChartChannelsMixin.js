@@ -10,6 +10,16 @@ import {
 
 const lightningChartChannelsMixin = (Base) =>
   class LightningChartChannelsMixin extends Base {
+    static CHART_LEFT_PADDING = 100;
+    get CHART_LEFT_PADDING() {
+      return LightningChartChannelsMixin.CHART_LEFT_PADDING;
+    }
+
+    static Y_AXIS_WIDTH = 60;
+    get Y_AXIS_WIDTH() {
+      return LightningChartChannelsMixin.Y_AXIS_WIDTH;
+    }
+
     static addChannel(
       dashboard,
       channel,
@@ -26,7 +36,11 @@ const lightningChartChannelsMixin = (Base) =>
           disableAnimations: true,
         })
         .setTitle("")
-        .setPadding({ left: 100, top: 0, bottom: 0 })
+        .setPadding({
+          left: LightningChartChannelsMixin.CHART_LEFT_PADDING,
+          top: 0,
+          bottom: 0,
+        })
         .setBackgroundStrokeStyle(emptyLine)
         .setMouseInteractions(false)
         .setMouseInteractionPan(true)
@@ -55,7 +69,7 @@ const lightningChartChannelsMixin = (Base) =>
         .setTitleFont(new FontSettings({ size: 12 }))
         .setTitleFillStyle(new SolidFill({ color: ColorHEX("#6e7079") }))
         .setTitleRotation(0)
-        .setThickness(60)
+        .setThickness(LightningChartChannelsMixin.Y_AXIS_WIDTH)
         .setAnimationZoom(undefined)
         .setTickStrategy(AxisTickStrategies.Numeric, (tickStrategy) =>
           tickStrategy

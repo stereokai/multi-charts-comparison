@@ -28,6 +28,11 @@ const uiModel = {
     areaZoom: false,
     montages: [],
     extrapolation: false,
+    toggleHotkeys: false,
+    hotkeys: [
+      { key: "left", label: "Pan left", action: "panLeft" },
+      { key: "right", label: "Pan right", action: "panRight" },
+    ],
   },
 };
 export default uiModel;
