@@ -85,7 +85,7 @@ export const channels = [
     displacement: 80,
     displacementRatio: 0.04,
     smoothing: 0.01,
-    easingType: 1,
+    easingType: 2,
   },
   { name: "Channel 8", displacement: 50, smoothing: 0.5, dynamicYAxis: true },
   { name: "Channel 9", displacement: 20, smoothing: 0.9, dynamicYAxis: true },
