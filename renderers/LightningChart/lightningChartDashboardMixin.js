@@ -1,5 +1,5 @@
 import { getBaseDate } from "@/Graphs/graphCommon";
-import { channels } from "@/models/state.js";
+import { channels, getChannelYAxisBounds } from "@/models/state.js";
 import {
   AxisTickStrategies,
   ColorCSS,
@@ -219,19 +219,38 @@ const lightningChartDashboardMixin = (Base) =>
 
     addGraphGroup() {
       const graphIndex = Math.floor(this.maxVisibleCharts / 2);
-      this.graphGroup = this.addChannel(
+      const graphGroup = this.addChannel(
         { name: "Channel Group" },
         graphIndex,
         null,
         true
       );
-      this.graphGroup.isGroup = true;
-      this.graphGroup.graphIndex = graphIndex;
-      this.graphGroup.series = {};
+      this.graphGroup = graphGroup;
+
+      graphGroup.isGroup = true;
+      graphGroup.graphIndex = graphIndex;
+      graphGroup.series = {};
+
+      graphGroup.repositionYAxis = function repositionYAxis() {
+        const { yAxis } = this;
+        yAxis.setInterval(
+          ...Object.values(this.series).reduce(
+            (minmax, series) => {
+              minmax[0] = Math.min(minmax[0], series.__bounds.min);
+              minmax[1] = Math.max(minmax[1], series.__bounds.max);
+              return minmax;
+            },
+            [Infinity, -Infinity]
+          ),
+          false,
+          true
+        );
+      }.bind(graphGroup);
     }
 
     toggleChannelGrouped(channelIndex, dontRender = false) {
-      if (channels[channelIndex].isGrouped) {
+      const channel = channels[channelIndex];
+      if (channel.isGrouped) {
         if (!this.mainGraph.isGroup) {
           this.addGraphGroup();
         }
@@ -240,7 +259,10 @@ const lightningChartDashboardMixin = (Base) =>
         const graph = graphs[channelIndex];
 
         const series = this.addLineSeries(mainGraph.chart, channelIndex);
+        series.__bounds = getChannelYAxisBounds(channel);
         mainGraph.series[channelIndex] = series;
+
+        mainGraph.repositionYAxis();
 
         series.add(graph.series.kc[0].La);
       } else {
@@ -266,6 +288,8 @@ const lightningChartDashboardMixin = (Base) =>
           }
 
           this.graphGroup = null;
+        } else {
+          mainGraph.repositionYAxis();
         }
       }
 
