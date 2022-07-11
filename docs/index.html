@@ -5,14 +5,14 @@
     <link rel="icon" type="image/svg+xml" href="/multi-charts-comparison/assets/favicon.17e50649.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
-    <script type="module" crossorigin src="/multi-charts-comparison/assets/index.b4d64697.js"></script>
-    <link rel="modulepreload" href="/multi-charts-comparison/assets/vendor.b30e4d30.js">
-    <link rel="modulepreload" href="/multi-charts-comparison/assets/workerpool.5c1328f7.js">
-    <link rel="modulepreload" href="/multi-charts-comparison/assets/echarts.e2696259.js">
-    <link rel="modulepreload" href="/multi-charts-comparison/assets/echarts.renderer.884f2cdc.js">
-    <link rel="modulepreload" href="/multi-charts-comparison/assets/lightningchart.renderer.59d95dbc.js">
+    <script type="module" crossorigin src="/multi-charts-comparison/assets/index.299f15ed.js"></script>
+    <link rel="modulepreload" href="/multi-charts-comparison/assets/vendor.cdc82bdf.js">
+    <link rel="modulepreload" href="/multi-charts-comparison/assets/workerpool.79c1317a.js">
+    <link rel="modulepreload" href="/multi-charts-comparison/assets/echarts.9bdfea43.js">
+    <link rel="modulepreload" href="/multi-charts-comparison/assets/echarts.renderer.414dafa2.js">
+    <link rel="modulepreload" href="/multi-charts-comparison/assets/lightningchart.renderer.36d70c9f.js">
     <link rel="stylesheet" href="/multi-charts-comparison/assets/vendor.d5b0724f.css">
-    <link rel="stylesheet" href="/multi-charts-comparison/assets/index.a00459a3.css">
+    <link rel="stylesheet" href="/multi-charts-comparison/assets/index.24b635e1.css">
   </head>
   <body>
     <main id="app">
@@ -98,6 +98,7 @@
               <label><input id="xf-area-zoom" type="checkbox" />Toggle area zoom</label>
               <label><input id="xf-extrapolation" type="checkbox" />Toggle extrapolation</label>
               <label><input id="xf-toggle-hotkeys" type="checkbox" />Toggle hotkeys</label>
+              <label><input id="xf-toggle-events" type="checkbox" />Toggle events</label>
               <button id="xf-save-montage" class="button small">
                 Save current view as montage
               </button>
@@ -111,5 +112,63 @@
       <div id="chart"></div>
     </main>
     
+
+    <div class="modal" id="modal-1" aria-hidden="true">
+      <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+        <div
+          class="modal__container"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-1-title"
+        >
+          <header class="modal__header">
+            <h2 class="modal__title" id="modal-1-title">Edit event</h2>
+            <button
+              class="modal__close"
+              aria-label="Close modal"
+              data-micromodal-close
+            ></button>
+          </header>
+          <main class="modal__content" id="modal-1-content">
+            <p>
+              Edit the event contents and press <code>Update</code> to save,
+              <code>Remove</code> to remove event, or <code>Cancel</code> to
+              close.
+            </p>
+
+            <textarea
+              name="eventName"
+              id="event-name"
+              cols="30"
+              rows="3"
+            ></textarea>
+          </main>
+          <footer class="modal__footer">
+            <button
+              data-micromodal-close
+              ok
+              class="modal__btn modal__btn-primary"
+            >
+              OK
+            </button>
+            <button
+              class="modal__btn red"
+              remove
+              data-micromodal-close
+              aria-label="Remove event"
+            >
+              Remove
+            </button>
+            <button
+              class="modal__btn"
+              data-micromodal-close
+              aria-label="Close this dialog window"
+            >
+              Cancel
+            </button>
+          </footer>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
