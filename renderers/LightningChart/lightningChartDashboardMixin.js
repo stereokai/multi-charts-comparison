@@ -1,15 +1,20 @@
 import { getBaseDate } from "@/Graphs/graphCommon";
-import { channels, getChannelYAxisBounds } from "@/models/state.js";
+import { app, channels, getChannelYAxisBounds } from "@/models/state.js";
 import {
   AxisTickStrategies,
   ColorCSS,
+  ColorHEX,
   emptyLine,
   lightningChart,
   SolidFill,
   SolidLine,
   synchronizeAxisIntervals,
   Themes,
+  UIDraggingModes,
+  UIVisibilityModes,
 } from "@arction/lcjs";
+import MicroModal from "micromodal";
+MicroModal.init();
 
 import * as areaZoom from "./AreaZoom";
 
@@ -59,6 +64,7 @@ const lightningChartDashboardMixin = (Base) =>
     constructor(...args) {
       super(...args);
       this.pinnedGraphs = [];
+      this.markers = [];
     }
 
     newDashboard(container, numberOfRows = this.maxVisibleCharts) {
@@ -374,6 +380,92 @@ const lightningChartDashboardMixin = (Base) =>
       }
 
       xAxis.pan(distance / pixelSizeX);
+    }
+
+    addEvent(point, channelIndex) {
+      if (!app.extraFeatures.events) {
+        return;
+      }
+
+      const graph = this.graphs[channelIndex];
+      const { chart, series } = graph;
+
+      const chartMarker = chart
+        .addChartMarkerXY(
+          // // UICircle,
+          // MarkerBuilders.XY.addStyler((styler) => {})
+          //   .setPointMarker(PointMarkers.UICircle)
+          //   .addStyler((styler1) => {}),
+          undefined,
+          chart.getDefaultAxisX(),
+          chart.getDefaultAxisY()
+        )
+        .setPosition({ x: point.x, y: point.y });
+
+      this.markers.push(chartMarker);
+
+      const pointMarker = chartMarker
+        .getPointMarker()
+        // .setSize({ width: 10, height: 10 })
+        .setFillStyle(
+          new SolidFill({
+            color: ColorHEX("#0075ff"),
+          })
+        );
+
+      pointMarker.onMouseClick(() => {
+        this.markers.forEach((chartMarker) => {
+          chartMarker.setResultTableVisibility(UIVisibilityModes.never);
+        });
+        chartMarker.setResultTableVisibility(UIVisibilityModes.always);
+      });
+
+      const rT = chartMarker.getResultTable();
+      rT.onMouseClick(() => {
+        MicroModal.show("modal-1", {
+          onShow: (modal, activeEl, event) => {
+            modal.querySelector("textarea").value =
+              chartMarker.__content.reduce((all, line) => {
+                return all + line.join(" ") + "\n";
+              }, "");
+          },
+          onClose: (modal, activeEl, event) => {
+            if (event.target.hasAttribute("ok")) {
+              chartMarker.__content = modal
+                .querySelector("textarea")
+                .value.trim()
+                .split("\n")
+                .map((part) => [part]);
+              chartMarker.setResultTable((table) =>
+                table.setContent(chartMarker.__content)
+              );
+              return;
+            }
+
+            if (event.target.hasAttribute("remove")) {
+              chartMarker.setResultTableVisibility(UIVisibilityModes.never);
+              chartMarker.dispose();
+              this.markers.splice(this.markers.indexOf(chartMarker), 1);
+              return;
+            }
+          },
+        });
+      });
+
+      chartMarker.__content = [
+        ["Custom event"],
+        ["Number", this.markers.length.toString()],
+      ];
+
+      // Style ChartMarker.
+      chartMarker
+        .setResultTableVisibility(UIVisibilityModes.never)
+        .setResultTable((table) => table.setContent(chartMarker.__content))
+        .setDraggingMode(UIDraggingModes.notDraggable)
+        .setGridStrokeXVisibility(UIVisibilityModes.whenDragged)
+        .setGridStrokeYVisibility(UIVisibilityModes.whenDragged)
+        .setTickMarkerXVisibility(UIVisibilityModes.whenDragged)
+        .setTickMarkerYVisibility(UIVisibilityModes.whenDragged);
     }
   };
 export default lightningChartDashboardMixin;

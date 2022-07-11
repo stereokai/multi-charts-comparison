@@ -187,6 +187,14 @@ function buildExtraFeatures() {
     event.target.blur();
   });
 
+  const xfToggleEvents = document.querySelector("#xf-toggle-events");
+  xfToggleEvents.checked = app.extraFeatures.events;
+  xfToggleEvents.addEventListener("change", (event) => {
+    app.extraFeatures.events = event.target.checked;
+    // graphs.api.toggleEvents();
+    event.target.blur();
+  });
+
   const xfToggleHotkeys = document.querySelector("#xf-toggle-hotkeys");
   xfToggleHotkeys.checked = app.extraFeatures.toggleHotkeys;
   xfToggleHotkeys.addEventListener("change", (event) => {

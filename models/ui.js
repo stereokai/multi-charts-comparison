@@ -29,6 +29,7 @@ const uiModel = {
     montages: [],
     extrapolation: false,
     toggleHotkeys: false,
+    events: false,
     hotkeys: [
       { key: "left", label: "Pan left", action: "panLeft" },
       { key: "right", label: "Pan right", action: "panRight" },

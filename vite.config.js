@@ -55,8 +55,6 @@ const copyTargets = [
   },
 ];
 
-console.log(copyTargets);
-
 if (process.env.NODE_ENV === "production") {
   copyTargets[0].src.unshift(
     toPosixPath(resolve(__dirname, ...workerpool.split("/")))

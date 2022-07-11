@@ -26,6 +26,7 @@
     "echarts": "~5.3.1",
     "handlebars": "~4.7.7",
     "hotkeys-js": "~3.9.4",
+    "micromodal": "~0.4.10",
     "sanitize.css": "~13.0.0",
     "vite-plugin-svg-icons": "~2.0.1",
     "workerpool": "~6.2.0"

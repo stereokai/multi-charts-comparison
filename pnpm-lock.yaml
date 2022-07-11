@@ -7,6 +7,7 @@ specifiers:
   echarts: ~5.3.1
   handlebars: ~4.7.7
   hotkeys-js: ~3.9.4
+  micromodal: ~0.4.10
   rollup: ~2.70.1
   rollup-plugin-copy-merge: ~0.2.0
   rollup-plugin-jscc: ~2.0.0
@@ -22,6 +23,7 @@ dependencies:
   echarts: 5.3.2
   handlebars: 4.7.7
   hotkeys-js: 3.9.4
+  micromodal: 0.4.10
   sanitize.css: 13.0.0
   vite-plugin-svg-icons: 2.0.1_vite@2.9.1
   workerpool: 6.2.0
@@ -1272,6 +1274,11 @@ packages:
       braces: 3.0.2
       picomatch: 2.3.1
     dev: true
+
+  /micromodal/0.4.10:
+    resolution: {integrity: sha512-BUrEnzMPFBwK8nOE4xUDYHLrlGlLULQVjpja99tpJQPSUEWgw3kTLp1n1qv0HmKU29AiHE7Y7sMLiRziDK4ghQ==}
+    engines: {node: '>=10'}
+    dev: false
 
   /minimatch/3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}

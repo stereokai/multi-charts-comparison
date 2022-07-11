@@ -1,11 +1,13 @@
 import { getChannelYAxisBounds } from "@/models/state.js";
 import {
+  AutoCursorModes,
   AxisTickStrategies,
   ColorCSS,
   ColorHEX,
   emptyLine,
   FontSettings,
   SolidFill,
+  UIVisibilityModes,
 } from "@arction/lcjs";
 
 const lightningChartChannelsMixin = (Base) =>
@@ -100,6 +102,8 @@ const lightningChartChannelsMixin = (Base) =>
         );
       }
 
+      chart.setAutoCursorMode(AutoCursorModes.disabled);
+
       return { chart, series, xAxis, yAxis, row: channelIndex };
     }
 
@@ -118,13 +122,35 @@ const lightningChartChannelsMixin = (Base) =>
 
     addChannel(channel, channelIndex, colorIndex, dontCreateSeries) {
       window.graphs = this.graphs;
-      return LightningChartChannelsMixin.addChannel(
+      const graph = LightningChartChannelsMixin.addChannel(
         this.dashboard,
         channel,
         channelIndex,
         colorIndex,
         dontCreateSeries
       );
+
+      const { chart, series, xAxis, yAxis, row } = graph;
+
+      //attaching an on click event to the seires
+      chart.onSeriesBackgroundMouseClick((chart, event) => {
+        //convert client location to engine canvas location
+        //  const engineLocation = chart.engine.clientLocation2Engine( event.clientX, event.clientY )
+
+        //fetching the data point and other parameters. The location parameter gives the data point
+        const res = series.solveNearestFromScreen(
+          chart.engine.clientLocation2Engine(event.clientX, event.clientY)
+        );
+        const x = parseFloat(res.resultTableContent[1][1]);
+        const y = parseFloat(res.resultTableContent[2][1]);
+        this.addEvent({ x, y }, channelIndex);
+
+        this.markers.forEach((chartMarker) => {
+          chartMarker.setResultTableVisibility(UIVisibilityModes.never);
+        });
+      });
+
+      return graph;
     }
 
     addLineSeries(chart, colorIndex) {
