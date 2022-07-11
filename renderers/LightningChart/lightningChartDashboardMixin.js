@@ -28,25 +28,38 @@ const lightningChartDashboardMixin = (Base) =>
     static hiddenGridStyle = emptyLine;
 
     static getNewDashboard(container, numberOfRows) {
-      return lightningChart({
-        overrideInteractionMouseButtons: {
-          chartXYPanMouseButton: 0, // LMB
-          chartXYRectangleZoomFitMouseButton: 2, // RMB
-        },
-      })
-        .Dashboard({
-          container,
-          numberOfColumns: 1,
-          numberOfRows,
-          theme: Themes.lightNew,
+      return (
+        lightningChart({
+          overrideInteractionMouseButtons: {
+            chartXYPanMouseButton: 0, // LMB
+            chartXYRectangleZoomFitMouseButton: 2, // RMB
+          },
         })
-        .setBackgroundFillStyle(
-          new SolidFill({
-            color: ColorCSS("white"),
+          .Dashboard({
+            container,
+            numberOfColumns: 1,
+            numberOfRows,
+            theme: Themes.lightNew,
           })
-        )
-        .setSplitterStyle(emptyLine)
-        .setSplitterStyleHighlight(emptyLine);
+          .setBackgroundFillStyle(
+            new SolidFill({
+              color: ColorCSS("white"),
+            })
+          )
+          // .setSplitterStyle(emptyLine)
+          .setSplitterStyle(
+            new SolidLine({
+              thickness: 2,
+              fillStyle: new SolidFill({ color: ColorCSS("black") }),
+            })
+          )
+          .setSplitterStyleHighlight(
+            new SolidLine({
+              thickness: 2,
+              fillStyle: new SolidFill({ color: ColorCSS("black") }),
+            })
+          )
+      );
     }
 
     get maxVisibleCharts() {

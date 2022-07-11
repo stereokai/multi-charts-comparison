@@ -87,9 +87,9 @@ export const channels = [
     smoothing: 0.01,
     easingType: 2,
   },
-  { name: "Channel 8", displacement: 50, smoothing: 0.5, dynamicYAxis: true },
-  { name: "Channel 9", displacement: 20, smoothing: 0.9, dynamicYAxis: true },
-  { name: "Channel 10", displacement: 300, smoothing: 1.2, dynamicYAxis: true },
+  { name: "Random 8", displacement: 50, smoothing: 0.5, dynamicYAxis: true },
+  { name: "Random 9", displacement: 20, smoothing: 0.9, dynamicYAxis: true },
+  { name: "Random 10", displacement: 300, smoothing: 1.2, dynamicYAxis: true },
 ];
 
 // Cool channel;
@@ -119,7 +119,7 @@ function getTaskConfig(...args) {
 
 function getRandomChannel(number) {
   return {
-    name: "Channel " + number,
+    name: "Random " + number,
     displacement: getRandom(30, 400),
     smoothing: getRandom(0.1, 2),
     displacementRatio: getRandom(0.1, 1),

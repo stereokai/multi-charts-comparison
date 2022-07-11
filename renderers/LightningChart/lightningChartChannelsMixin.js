@@ -7,6 +7,7 @@ import {
   emptyLine,
   FontSettings,
   SolidFill,
+  SolidLine,
   UIVisibilityModes,
 } from "@arction/lcjs";
 
@@ -20,6 +21,11 @@ const lightningChartChannelsMixin = (Base) =>
     static Y_AXIS_WIDTH = 60;
     get Y_AXIS_WIDTH() {
       return LightningChartChannelsMixin.Y_AXIS_WIDTH;
+    }
+
+    static CHART_GAP = 10;
+    get CHART_GAP() {
+      return LightningChartChannelsMixin.CHART_GAP;
     }
 
     static addChannel(
@@ -40,12 +46,30 @@ const lightningChartChannelsMixin = (Base) =>
         .setTitle("")
         .setPadding({
           left: LightningChartChannelsMixin.CHART_LEFT_PADDING,
-          top: 0,
-          bottom: 0,
+          top: LightningChartChannelsMixin.CHART_GAP / 2,
+          bottom: LightningChartChannelsMixin.CHART_GAP / 2,
         })
         .setBackgroundStrokeStyle(emptyLine)
         .setMouseInteractions(false)
         .setMouseInteractionPan(true)
+        .setMouseInteractionRectangleFit(false)
+        .setZoomingRectangleStrokeStyle(
+          new SolidLine({
+            thickness: 2,
+            fillStyle: new SolidFill({ color: ColorCSS("red") }),
+          })
+        )
+        .setFittingRectangleStrokeStyle(
+          new SolidLine({
+            thickness: 2,
+            fillStyle: new SolidFill({ color: ColorCSS("blue") }),
+          })
+        )
+        .setBackgroundFillStyle(
+          new SolidFill({
+            color: ColorHEX("#f0f0f0"),
+          })
+        )
         .setSeriesBackgroundFillStyle(
           new SolidFill({
             color: ColorCSS("white"),
