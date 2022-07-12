@@ -32,4 +32,12 @@ workerpool.worker({
   [DATA_GENERATOR_TASKS.setTotalSamples]: (data) => {
     setTotalSamples(data.samples);
   },
+  [DATA_GENERATOR_TASKS.limitArray]: (data) => {
+    return limitArray(
+      data.channelData,
+      data.dataMin,
+      data.dataMax,
+      data.limitFactor
+    );
+  },
 });

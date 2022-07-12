@@ -165,6 +165,16 @@ function buildExtraFeatures() {
   channelListItemTemplate = Handlebars.compile(channelListItem);
   montageListItemTemplate = Handlebars.compile(montageListItem);
 
+  const xfToggleZoomBasedData = document.querySelector(
+    "#xf-toggle-zoom-based-data"
+  );
+  xfToggleZoomBasedData.checked = app.extraFeatures.toggleZoomBasedData;
+  xfToggleZoomBasedData.addEventListener("change", (event) => {
+    app.extraFeatures.toggleZoomBasedData = event.target.checked;
+    graphs.api.toggleZoomBasedData(event.target.checked);
+    event.target.blur();
+  });
+
   const xfToggleGrid = document.querySelector("#xf-toggle-grid");
   xfToggleGrid.checked = app.extraFeatures.toggleGrid;
   xfToggleGrid.addEventListener("change", (event) => {

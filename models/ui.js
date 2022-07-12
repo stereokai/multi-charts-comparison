@@ -24,6 +24,7 @@ const uiModel = {
     label: "Last event",
   },
   extraFeatures: {
+    toggleZoomBasedData: false,
     toggleGrid: true,
     areaZoom: false,
     montages: [],

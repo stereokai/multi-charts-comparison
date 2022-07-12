@@ -75,8 +75,8 @@ function generateTimeseries(
 ) {
   const samplesPerTimestampInSeconds = 1 / samplesPerSecond;
   const samplesPerTimestampInMilliseconds = samplesPerTimestampInSeconds * 1000;
-
   const timestamps = new Array(totalSamples);
+
   for (let i = 0; i < totalSamples; i++) {
     timestamps[i] = firstTimestamp + i * samplesPerTimestampInMilliseconds;
   }
