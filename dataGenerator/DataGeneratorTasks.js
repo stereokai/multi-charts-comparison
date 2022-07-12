@@ -1,6 +1,7 @@
 const DATA_GENERATOR_TASKS = {
   generateDataSeries: "generateDataSeries",
   generatePunchedDataSeries: "generatePunchedDataSeries",
+  limitArray: "limitArray",
   setTotalSamples: "setTotalSamples",
 };
 
@@ -20,6 +21,17 @@ function getPunchedDataTaskConfig(channel, samples) {
     data: {
       channel,
       samples,
+    },
+  };
+}
+
+function getLimitArrayTaskConfig(channel, channelData, limitFactor) {
+  return {
+    name: DATA_GENERATOR_TASKS.limitArray,
+    data: {
+      channel,
+      channelData,
+      limitFactor,
     },
   };
 }

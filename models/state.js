@@ -86,6 +86,7 @@ export const channels = [
     displacementRatio: 0.04,
     smoothing: 0.01,
     easingType: 2,
+    samplesPerSecond: 10,
   },
   { name: "Random 8", displacement: 50, smoothing: 0.5, dynamicYAxis: true },
   { name: "Random 9", displacement: 20, smoothing: 0.9, dynamicYAxis: true },
@@ -171,4 +172,12 @@ export function getChannelYAxisBounds(channel) {
     max:
       typeof channel.yAxisMax === "number" ? channel.yAxisMax : channel.dataMax,
   };
+}
+
+export function getLimitedChannelData(channelDataGetter) {
+  return dataOperation((queueTask) => {
+    channels.forEach((channel, i) =>
+      queueTask(getLimitArrayTaskConfig(channel, channelDataGetter(i), 0.2))
+    );
+  });
 }
