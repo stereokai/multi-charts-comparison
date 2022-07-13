@@ -1,5 +1,4 @@
 import replace from "@rollup/plugin-replace";
-import esbuild from "esbuild";
 import { readdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { createRequire } from "module";
 import { join, resolve } from "path";
@@ -115,14 +114,14 @@ export default defineConfig({
             CW = decorateAllFunctionCalls("CompiledWorker.js", CW.toString());
             writeFileSync(`./${OUT_DIR}/${CompiledWorker}`, CW.code);
 
-            esbuild.buildSync({
-              entryPoints: [`./${OUT_DIR}/${CompiledWorker}`],
-              bundle: false,
-              minify: true,
-              sourcemap: false,
-              allowOverwrite: true,
-              outfile: `./${OUT_DIR}/${CompiledWorker}`,
-            });
+            // esbuild.buildSync({
+            //   entryPoints: [`./${OUT_DIR}/${CompiledWorker}`],
+            //   bundle: false,
+            //   minify: true,
+            //   sourcemap: false,
+            //   allowOverwrite: true,
+            //   outfile: `./${OUT_DIR}/${CompiledWorker}`,
+            // });
           },
         },
       ],
