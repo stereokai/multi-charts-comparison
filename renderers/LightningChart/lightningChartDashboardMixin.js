@@ -486,7 +486,12 @@ const lightningChartDashboardMixin = (Base) =>
       if (app.extraFeatures.toggleZoomBasedData) {
         dataOperation((queueTask) => {
           this.graphs.forEach((graph) => {
-            graph.fullData = graph.series.kc[0].La.map((point) => point.y);
+            const _data = graph.series.kc[0].La;
+            for (let i = 0; i < _data; i++) {
+              _data[i] = data[i].y;
+            }
+
+            graph.fullData = _data;
             graph.fullBoundaries = graph.series.getBoundaries();
             graph.fullInterval = graph.yAxis.getInterval();
 
