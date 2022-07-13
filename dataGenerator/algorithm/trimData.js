@@ -15,12 +15,14 @@ function limitArray(array, min, max, limitFactor = 1) {
   min = Infinity;
   max = -Infinity;
 
+  for (var i = 0; i < array.length; i++) {
+    min = Math.min(min, array[i]);
+    max = Math.max(max, array[i]);
+    array[i] = array[i] * (1 - limitFactor);
+  }
+
   return {
-    data: array.map((value) => {
-      min = Math.min(min, value);
-      max = Math.max(max, value);
-      return value * (1 - limitFactor);
-    }),
+    data: array,
     dataMin: min,
     dataMax: max,
   };

@@ -110,6 +110,25 @@ export const channels = [
 // name: "Channel 7"
 // smoothing: 0.3574907065906837
 
+function getChannelConfig(channel) {
+  return {
+    name: channel.name,
+    start: channel.start,
+    end: channel.end,
+    dataMin: channel.dataMin,
+    dataMax: channel.dataMax,
+    yAxisMin: channel.yAxisMin,
+    yAxisMax: channel.yAxisMax,
+    displacement: channel.displacement,
+    smoothing: channel.smoothing,
+    easingType: channel.easingType,
+    displacementRatio: channel.displacementRatio,
+    samplesPerSecond: channel.samplesPerSecond,
+    dynamicYAxis: channel.dynamicYAxis,
+    isSticky: channel.isSticky,
+  };
+}
+
 function getTaskConfig(...args) {
   if (!app.extraFeatures.extrapolation) {
     return getDataTaskConfig(...args);
@@ -130,7 +149,7 @@ function getRandomChannel(number) {
 export function regenerateAllChannels(samplesPerChannel) {
   return dataOperation((queueTask) => {
     channels.forEach((channel) =>
-      queueTask(getTaskConfig(channel, samplesPerChannel))
+      queueTask(getTaskConfig(getChannelConfig(channel), samplesPerChannel))
     );
   });
 }
@@ -177,7 +196,13 @@ export function getChannelYAxisBounds(channel) {
 export function getLimitedChannelData(channelDataGetter) {
   return dataOperation((queueTask) => {
     channels.forEach((channel, i) =>
-      queueTask(getLimitArrayTaskConfig(channel, channelDataGetter(i), 0.2))
+      queueTask(
+        getLimitArrayTaskConfig(
+          getChannelConfig(channel),
+          channelDataGetter(i),
+          0.2
+        )
+      )
     );
   });
 }

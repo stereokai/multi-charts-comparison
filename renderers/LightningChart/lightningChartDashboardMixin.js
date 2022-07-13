@@ -185,6 +185,10 @@ const lightningChartDashboardMixin = (Base) =>
       } else {
         graph.series.restore();
         graph.yAxis.restore();
+        this.toggleZoomBasedData({
+          start: channelIndex,
+          end: channelIndex + 1,
+        });
       }
 
       if (!dontRender) {
@@ -482,34 +486,47 @@ const lightningChartDashboardMixin = (Base) =>
         .setTickMarkerYVisibility(UIVisibilityModes.whenDragged);
     }
 
-    toggleZoomBasedData() {
+    toggleZoomBasedData(subset) {
+      const graphs = subset
+        ? this.graphs.slice(subset.start, subset.end)
+        : this.graphs;
+
       if (app.extraFeatures.toggleZoomBasedData) {
         dataOperation((queueTask) => {
-          this.graphs.forEach((graph) => {
-            const _data = graph.series.kc[0].La;
-            for (let i = 0; i < _data; i++) {
-              _data[i] = data[i].y;
+          graphs.forEach((graph, i) => {
+            if (channels[i] && channels[i].isHidden) {
+              return;
             }
 
-            graph.fullData = _data;
+            graph.fullData = [];
+            for (let i = 0; i < graph.series.kc[0].La.length; i++) {
+              graph.fullData[i] = graph.series.kc[0].La[i].y;
+            }
+
             graph.fullBoundaries = graph.series.getBoundaries();
             graph.fullInterval = graph.yAxis.getInterval();
 
             queueTask({
               name: "limitArray",
               data: {
-                dataMin: graph.fullBoundaries.minY,
-                dataMax: graph.fullBoundaries.maxY,
+                dataMin: graph.fullBoundaries.min.y,
+                dataMax: graph.fullBoundaries.max.y,
                 channelData: graph.fullData,
                 limitFactor: 0.2,
               },
             });
           });
         }).then((dataset) => {
+          let hiddenChannels = 0;
           dataset.forEach((channelData, i) => {
-            this.graphs[i].limitedData = channelData.data;
-            this.graphs[i].limitedDataMin = channelData.dataMin;
-            this.graphs[i].limitedDataMax = channelData.dataMax;
+            if (channels[i] && channels[i].isHidden) {
+              hiddenChannels++;
+            }
+
+            const graph = this.graphs[i + hiddenChannels];
+            graph.limitedData = channelData.data;
+            graph.limitedDataMin = channelData.dataMin;
+            graph.limitedDataMax = channelData.dataMax;
           });
 
           const initialInterval = this.mainGraph.xAxis.getInterval();
@@ -526,7 +543,7 @@ const lightningChartDashboardMixin = (Base) =>
       } else {
         this.graphs[0].yAxis.offScaleChange(this.zoomBasedDataCB);
         this.zoomBasedDataHandler(0, 0);
-        this.graphs.forEach((graph) => {
+        graphs.forEach((graph) => {
           graph.fullData = null;
           graph.fullBoundaries = null;
           graph.fullInterval = null;
@@ -549,7 +566,8 @@ const lightningChartDashboardMixin = (Base) =>
         }, 1000);
 
         this.isShowingLimitedZoomBasedData = true;
-        this.graphs.forEach((graph) => {
+        this.graphs.forEach((graph, i) => {
+          if (channels[i] && channels[i].isHidden) return;
           graph.series.clear();
           graph.series.addArraysXY(this.timeSeries, graph.limitedData);
           graph.yAxis.setInterval(graph.limitedDataMin, graph.limitedDataMax);
@@ -569,6 +587,7 @@ const lightningChartDashboardMixin = (Base) =>
 
         this.isShowingLimitedZoomBasedData = false;
         this.graphs.forEach((graph, i) => {
+          if (channels[i] && channels[i].isHidden) return;
           graph.series.clear();
           graph.series.addArraysXY(this.timeSeries, graph.fullData);
 
@@ -579,6 +598,15 @@ const lightningChartDashboardMixin = (Base) =>
           graph.yAxis.setMouseInteractions(false);
           graph.yAxis.setChartInteractions(false);
         });
+      }
+    }
+
+    afterUpdate() {
+      requestAnimationFrame(() => {
+        this.toggleZoomBasedData();
+      });
+      if (super.afterUpdate) {
+        super.afterUpdate();
       }
     }
   };

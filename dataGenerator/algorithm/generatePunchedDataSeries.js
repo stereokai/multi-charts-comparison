@@ -48,25 +48,20 @@ function punchHolesInArray(array, replaceWith) {
         oLimit - count
       );
 
+      const replacement = new Array(adjustedSampleSize);
       if (typeof replaceWith === "undefined") {
         const prevItem = array[i - 1];
         const nextItem = array[i + adjustedSampleSize + 1];
         const step = (nextItem - prevItem) / adjustedSampleSize;
 
-        array.splice(
-          i,
-          adjustedSampleSize,
-          ...[...new Array(adjustedSampleSize)].map((_, j) => {
-            return prevItem + step * j;
-          })
-        );
+        for (let j = 0; j < adjustedSampleSize; j++) {
+          replacement[j] = prevItem + step * j;
+        }
       } else {
-        array.splice(
-          i,
-          adjustedSampleSize,
-          ...new Array(adjustedSampleSize).fill(NaN)
-        );
+        replacement.fill(replaceWith);
       }
+
+      array.splice(i, adjustedSampleSize, ...replacement);
 
       count += adjustedSampleSize;
       i += adjustedSampleSize;
