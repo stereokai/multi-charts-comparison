@@ -77,7 +77,7 @@ function punchHolesInArray(array, replaceWith) {
 }
 
 // Same signature as generateDataSeries
-function generateDataWithExtrapolations(...args) {
+function generateDataWithExtrapolations(replaceWith, ...args) {
   const { data, dataMin, dataMax } = generateDataSeries(...args);
-  return { data: punchHolesInArray(data), dataMin, dataMax };
+  return { data: punchHolesInArray(data, replaceWith), dataMin, dataMax };
 }
