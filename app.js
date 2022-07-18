@@ -193,7 +193,7 @@ function buildExtraFeatures() {
   xfExtrapolation.checked = app.extraFeatures.extrapolation;
   xfExtrapolation.addEventListener("change", (event) => {
     app.extraFeatures.extrapolation = event.target.checked;
-    graphs.regenerateAllChannels();
+    graphs.transformAllChannels();
     event.target.blur();
   });
 

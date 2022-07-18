@@ -14,6 +14,7 @@ function newOperationId() {
 }
 
 function queueTask(task) {
+  console.log("task", task);
   workQueue.push(workerPool.exec(task.name, [task.data]));
 }
 

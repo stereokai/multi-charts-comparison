@@ -3,6 +3,7 @@ import {
   channels,
   regenerateAllChannels as regenerateAllChannelsOperation,
   removeChannels,
+  transformAllChannels as transformAllChannelsOperation,
 } from "@/models/state.js";
 import { renderer } from "@/router.js";
 import { getBaseDate } from "./graphCommon";
@@ -87,6 +88,14 @@ export function regenerateAllChannels(
   samplesPerChannel = prevSamplesPerChannel
 ) {
   setChartData(() => regenerateAllChannelsOperation(samplesPerChannel));
+}
+
+export function transformAllChannels(
+  samplesPerChannel = prevSamplesPerChannel
+) {
+  setChartData(() =>
+    transformAllChannelsOperation(chart.api.getChannelData, samplesPerChannel)
+  );
 }
 
 export function onSettingChange(

@@ -4,7 +4,8 @@ const DATA_GENERATOR = {
   limitArray: "limitArray",
   punchHolesInArray: "punchHolesInArray",
   setTotalSamples: "setTotalSamples",
-  generateData: "generateData",
+  generateAndTransformData: "generateAndTransformData",
+  transformData: "transformData",
 };
 
 DATA_GENERATOR.getTaskConfig = {
@@ -40,8 +41,12 @@ DATA_GENERATOR.getTaskConfig = {
     data,
     replaceWith,
   }),
-  [DATA_GENERATOR.generateData]: (config, transforms) => ({
-    config,
+  [DATA_GENERATOR.generateAndTransformData]: (generate, transforms) => ({
+    generate,
+    transforms,
+  }),
+  [DATA_GENERATOR.transformData]: (data, transforms) => ({
+    data: { data },
     transforms,
   }),
 };

@@ -28,7 +28,7 @@ const uiModel = {
     toggleGrid: true,
     areaZoom: false,
     montages: [],
-    extrapolation: false,
+    extrapolation: true,
     toggleHotkeys: false,
     events: false,
     hotkeys: [

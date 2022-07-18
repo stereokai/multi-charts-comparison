@@ -92,7 +92,7 @@ export const channels = [
   { name: "Random 9", displacement: 20, smoothing: 0.9, dynamicYAxis: true },
   { name: "Random 10", displacement: 300, smoothing: 1.2, dynamicYAxis: true },
 ];
-
+window.channels = channels;
 // Cool channel;
 // dataMax: 73.07131716790869
 // dataMin: 4.542635989696553
@@ -129,12 +129,14 @@ function getChannelConfig(channel) {
   };
 }
 
-function getTaskConfig(...args) {
-  if (!app.extraFeatures.extrapolation) {
-    return DATA_GENERATOR.getTaskConfig.generateDataSeries(...args);
-  } else {
-    return DATA_GENERATOR.getTaskConfig.generateDataWithExtrapolations(...args);
+function getTransforms() {
+  const transforms = [];
+
+  if (app.extraFeatures.extrapolation) {
+    transforms.push(DATA_GENERATOR.getTaskConfig.punchHolesInArray());
   }
+
+  return transforms;
 }
 
 function getRandomChannel(number) {
@@ -149,7 +151,33 @@ function getRandomChannel(number) {
 export function regenerateAllChannels(samplesPerChannel) {
   return dataOperation((queueTask) => {
     channels.forEach((channel) =>
-      queueTask(getTaskConfig(getChannelConfig(channel), samplesPerChannel))
+      queueTask(
+        DATA_GENERATOR.getTaskConfig.generateAndTransformData(
+          DATA_GENERATOR.getTaskConfig.generateDataSeries(
+            getChannelConfig(channel),
+            samplesPerChannel
+          ),
+          getTransforms()
+        )
+      )
+    );
+  });
+}
+
+export function transformAllChannels(channelDataGetter, samplesPerChannel) {
+  const transforms = getTransforms();
+  if (!transforms.length) {
+    return regenerateAllChannels(samplesPerChannel);
+  }
+
+  return dataOperation((queueTask) => {
+    channels.forEach((channel, i) =>
+      queueTask(
+        DATA_GENERATOR.getTaskConfig.transformData(
+          channelDataGetter(i),
+          transforms
+        )
+      )
     );
   });
 }
@@ -157,7 +185,8 @@ export function regenerateAllChannels(samplesPerChannel) {
 export function addChannels(
   numberOfChannelsToAdd,
   samplesPerChannel,
-  shouldGenerateData = true
+  shouldGenerateData = true,
+  shouldIgnoreTransforms = false
 ) {
   if (numberOfChannelsToAdd < 1) {
     throw new Error("Can't add 0 channels");
@@ -168,9 +197,12 @@ export function addChannels(
       const channelNumber = channels.length + 1;
       if (shouldGenerateData) {
         queueTask(
-          getTaskConfig(
-            channels[channels.push(getRandomChannel(channelNumber)) - 1],
-            samplesPerChannel
+          DATA_GENERATOR.getTaskConfig.generateAndTransformData(
+            DATA_GENERATOR.getTaskConfig.generateDataSeries(
+              channels[channels.push(getRandomChannel(channelNumber)) - 1],
+              samplesPerChannel
+            ),
+            shouldIgnoreTransforms ? [] : getTransforms()
           )
         );
       } else {

@@ -182,5 +182,14 @@ const lightningChartChannelsMixin = (Base) =>
     addLineSeries(chart, colorIndex) {
       return LightningChartChannelsMixin.addLineSeries(chart, colorIndex);
     }
+
+    getChannelData(channelIndex) {
+      const channelData = [];
+      const graph = this.graphs[channelIndex];
+      for (let i = 0; i < graph.series.kc[0].La.length; i++) {
+        channelData[i] = graph.series.kc[0].La[i].y;
+      }
+      return channelData;
+    }
   };
 export default lightningChartChannelsMixin;

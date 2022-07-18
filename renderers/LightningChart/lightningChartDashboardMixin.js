@@ -498,10 +498,7 @@ const lightningChartDashboardMixin = (Base) =>
               return;
             }
 
-            graph.fullData = [];
-            for (let i = 0; i < graph.series.kc[0].La.length; i++) {
-              graph.fullData[i] = graph.series.kc[0].La[i].y;
-            }
+            graph.fullData = this.getChannelData(i);
 
             graph.fullBoundaries = graph.series.getBoundaries();
             graph.fullInterval = graph.yAxis.getInterval();
@@ -511,7 +508,7 @@ const lightningChartDashboardMixin = (Base) =>
               data: {
                 dataMin: graph.fullBoundaries.min.y,
                 dataMax: graph.fullBoundaries.max.y,
-                channelData: graph.fullData,
+                data: graph.fullData,
                 limitFactor: 0.2,
               },
             });

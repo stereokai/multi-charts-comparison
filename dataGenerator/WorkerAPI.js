@@ -43,16 +43,37 @@ const WorkerAPI = {
   [DATA_GENERATOR.punchHolesInArray]: (config) => {
     return punchHolesInArray(config.data, config.replaceWith);
   },
-  [DATA_GENERATOR.generateData]: (options) => {
-    const hasTransforms = options.transforms && options.transforms.length;
+  [DATA_GENERATOR.transformData]: (config) => {
+    return config.transforms.reduce((prevTaskResult, transformConfig) => {
+      const transform = WorkerAPI[transformConfig.name];
+      const result = transform({
+        ...transformConfig.data,
+        data: prevTaskResult.data,
+      });
 
+      if (Array.isArray(result)) {
+        return {
+          ...prevTaskResult,
+          data: result,
+        };
+      }
+
+      return {
+        ...prevTaskResult,
+        ...result,
+      };
+    }, config.data);
+  },
+  [DATA_GENERATOR.generateAndTransformData]: (config) => {
+    const hasTransforms = config.transforms && config.transforms.length;
     if (!hasTransforms) {
-      return WorkerAPI[options.config.name](options.config);
+      return WorkerAPI[config.generate.name](config.generate.data);
     }
 
-    return options.transforms.reduce((data, transformConfig) => {
-      return WorkerAPI[transformConfig.name]({ ...transformConfig, data });
-    }, WorkerAPI[DATA_GENERATOR.generateDataSeries](options.config));
+    return WorkerAPI[DATA_GENERATOR.transformData]({
+      data: WorkerAPI[config.generate.name](config.generate.data),
+      transforms: config.transforms,
+    });
   },
 };
 
