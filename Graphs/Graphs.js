@@ -23,7 +23,6 @@ export function on(...args) {
 export function initGraph(container, samplesPerChannel, samplesPerSecond) {
   onTotalSamplesChange(samplesPerChannel, samplesPerSecond);
   chart.init(container);
-  chart.graphEvents.dataOperationStarted();
 
   if (channels.length) regenerateAllChannels(samplesPerChannel);
 }
@@ -89,12 +88,14 @@ function generateTimeseries(
 export function regenerateAllChannels(
   samplesPerChannel = prevSamplesPerChannel
 ) {
+  chart.graphEvents.dataOperationStarted();
   setChartData(() => regenerateAllChannelsOperation(samplesPerChannel));
 }
 
 export function transformAllChannels(
   samplesPerChannel = prevSamplesPerChannel
 ) {
+  chart.graphEvents.dataOperationStarted();
   setChartData(() =>
     transformAllChannelsOperation(chart.api.getChannelData, samplesPerChannel)
   );

@@ -372,7 +372,7 @@ const lightningChartDashboardMixin = (Base) =>
     }
 
     panLeft() {
-      const { xAxis, series } = this.mainGraph;
+      const { xAxis, series } = this.graphs[0];
       const { minX } = this;
       const { start, end } = xAxis.getInterval();
       const pixelSizeX = series.scale.x.getPixelSize();
@@ -386,7 +386,7 @@ const lightningChartDashboardMixin = (Base) =>
     }
 
     panRight() {
-      const { xAxis, series } = this.mainGraph;
+      const { xAxis, series } = this.graphs[0];
       const { maxX } = this;
       const { start, end } = xAxis.getInterval();
       const pixelSizeX = series.scale.x.getPixelSize();
@@ -491,6 +491,7 @@ const lightningChartDashboardMixin = (Base) =>
         : this.graphs;
 
       if (app.extraFeatures.toggleZoomBasedData) {
+        this.graphEvents.dataOperationStarted();
         dataOperation((queueTask) => {
           graphs.forEach((graph, i) => {
             if (channels[i] && channels[i].isHidden) {
@@ -512,6 +513,7 @@ const lightningChartDashboardMixin = (Base) =>
             });
           });
         }).then((dataset) => {
+          this.graphEvents.dataOperationEnded();
           let hiddenChannels = 0;
           dataset.forEach((channelData, i) => {
             if (channels[i] && channels[i].isHidden) {
