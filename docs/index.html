@@ -5,19 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/multi-charts-comparison/assets/favicon.17e50649.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
-    <script type="module" crossorigin src="/multi-charts-comparison/assets/index.efc83dc9.js"></script>
-    <link rel="modulepreload" href="/multi-charts-comparison/assets/vendor.6c40c153.js">
-    <link rel="modulepreload" href="/multi-charts-comparison/assets/workerpool.4aa10b3a.js">
-    <link rel="modulepreload" href="/multi-charts-comparison/assets/echarts.renderer.e7d8b748.js">
-    <link rel="modulepreload" href="/multi-charts-comparison/assets/lightningchart.renderer.f136d795.js">
+    <script type="module" crossorigin src="/multi-charts-comparison/assets/index.a4922f3e.js"></script>
+    <link rel="modulepreload" href="/multi-charts-comparison/assets/vendor.0cc72c00.js">
+    <link rel="modulepreload" href="/multi-charts-comparison/assets/workerpool.11c947d2.js">
+    <link rel="modulepreload" href="/multi-charts-comparison/assets/echarts.renderer.fe6422c4.js">
+    <link rel="modulepreload" href="/multi-charts-comparison/assets/lightningchart.renderer.4219bc15.js">
     <link rel="stylesheet" href="/multi-charts-comparison/assets/vendor.d5b0724f.css">
-    <link rel="stylesheet" href="/multi-charts-comparison/assets/index.24b635e1.css">
+    <link rel="stylesheet" href="/multi-charts-comparison/assets/index.fffabddc.css">
   </head>
   <body>
     <main id="app">
       <fieldset id="toolbar">
         <div class="toolbar-main">
-          <div class="toolbarItem">
+          <div class="toolbar-item">
             <h1 id="chart-header"></h1>
           </div>
       
@@ -96,7 +96,10 @@
                 graphs</label>
               <label><input id="xf-area-zoom" type="checkbox" />Toggle area zoom</label>
               <label><input id="xf-extrapolation" type="checkbox" />Toggle extrapolation</label>
-              <label><input id="xf-toggle-hotkeys" type="checkbox" />Toggle hotkeys</label>
+              <label><input id="xf-toggle-hotkeys" type="checkbox" />Toggle hotkeys<div
+                  onclick="event.preventDefault()"
+                  class="show-when-checked"
+                ><kbd>← Left</kbd> and <kbd>Right →</kbd></div></label>
               <label><input id="xf-toggle-events" type="checkbox" />Toggle events</label>
               <label id="label-zoom-based-data"><input
                   id="xf-toggle-zoom-based-data"
