@@ -18,11 +18,14 @@ function queueTask(task) {
 }
 
 function clearQueue(operationId) {
+  //#if _DEVELOPMENT
   console.log(
     operationId
       ? `Terminating operation: ${operationId}`
       : "Clearing worker queue"
   );
+  //#endif
+
   rejecters[operationId] &&
     rejecters[operationId](`Operation ${operationId} terminated`);
   workerPool.terminate(true);
@@ -45,16 +48,23 @@ function newOperation(operationId) {
 export function dataOperation(workCallback) {
   const operationId = newOperationId();
   const onOperationEnd = newOperation(operationId);
+
+  //#if _DEVELOPMENT
   console.log(`Starting operation ${operationId}`);
+  //#endif
 
   workCallback(queueTask);
 
   return onOperationEnd().then((results) => {
     if (lastOperation === operationId) {
+      //#if _DEVELOPMENT
       console.log(`Operation ${operationId} ended with results`, results);
+      //#endif
       return results;
     } else {
+      //#if _DEVELOPMENT
       console.log(`Operation ${operationId} ended but was terminated`, results);
+      //#endif
       return Promise.reject(
         `Operation ${operationId} ended but was terminated`
       );

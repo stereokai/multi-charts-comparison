@@ -79,9 +79,7 @@ const lightningChartChannelsMixin = (Base) =>
       const xAxis = chart
         .getDefaultAxisX()
         .setMouseInteractions(false)
-        .setTickStrategy(AxisTickStrategies.Empty, (styler) =>
-          console.log(styler)
-        )
+        .setTickStrategy(AxisTickStrategies.Empty, (styler) => false)
         .setStrokeStyle(emptyLine);
 
       const yAxisBounds = getChannelYAxisBounds(channel);
@@ -168,7 +166,9 @@ const lightningChartChannelsMixin = (Base) =>
           const y = parseFloat(res.resultTableContent[2][1]);
           this.addEvent({ x, y }, channelIndex);
         } catch (e) {
+          //#if _DEVELOPMENT
           console.log(`Could not add event marker, ${e}`);
+          //#endif
         }
         this.markers.forEach((chartMarker) => {
           chartMarker.setResultTableVisibility(UIVisibilityModes.never);

@@ -66,7 +66,6 @@ if (process.env.NODE_ENV === "development") {
 }
 
 function logAllFunctionCalls() {
-  console.log(process.env.LOG_ALL);
   if (process.env.LOG_ALL) {
     return {
       name: "inject-console-logs",

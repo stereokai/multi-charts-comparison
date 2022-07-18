@@ -109,12 +109,14 @@ function onSliderChange(event) {
 }
 
 function onGraphEvent(graphEvent) {
+  //#if _DEVELOPMENT
   console.log(
     `Last event was ${graphEvent.type}` +
       (graphEvent.duration
         ? ` which took ${graphEvent.duration.toFixed(2)}s`
         : "")
   );
+  //#endif
 
   if (graphEvent.type === graphs.EVENTS.dataOperationStart) {
     labels.chartHeader.classList.add("show-loader");

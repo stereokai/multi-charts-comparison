@@ -51,7 +51,9 @@ function setChartData(dataOperation) {
       updateChart(dataset);
     })
     .catch((err) => {
+      //#if _DEVELOPMENT
       console.log("Operation error", err);
+      //#endif
     })
     .finally(() => {
       chart.hideLoading();
