@@ -1,6 +1,6 @@
 import replace from "@rollup/plugin-replace";
 import esbuild from "esbuild";
-import { readdirSync, statSync } from "fs";
+import { readdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { createRequire } from "module";
 import { join, resolve } from "path";
 import copy from "rollup-plugin-copy-merge";
@@ -13,6 +13,7 @@ import {
   algorithmESModuleParts,
   workerFiles,
 } from "./dataGenerator/builder.js";
+import { decorateAllFunctionCalls } from "./decorateAllFunctionCalls.js";
 import { default as toolbarConfiguration } from "./models/ui.js";
 import { aliasesForVite } from "./pathbroker.mjs";
 import { toPosixPath } from "./utils.js";
@@ -94,15 +95,15 @@ export default defineConfig({
     target: "esnext",
     rollupOptions: {
       plugins: [
-        // {
-        //   name: "inject-console-logs",
-        //   transform(source, id) {
-        //     if (id.indexOf("node_modules") > -1) return null;
-        //     if (id.slice(-3) !== ".js") return null;
-        //     if (id.indexOf("Graphs.js") > -1) return null;
-        //     return decorateAllFunctionCalls(id, source);
-        //   },
-        // },
+        {
+          name: "inject-console-logs",
+          transform(source, id) {
+            if (id.indexOf("node_modules") > -1) return null;
+            if (id.slice(-3) !== ".js") return null;
+            if (id.indexOf("Graphs.js") > -1) return null;
+            return decorateAllFunctionCalls(id, source);
+          },
+        },
         {
           name: "minify-compiled-worker",
           writeBundle: (opts, bundle) => {
@@ -110,9 +111,9 @@ export default defineConfig({
             const CompiledWorker = Object.keys(bundle).find(
               (fileName) => fileName.indexOf("CompiledWorker") > -1
             );
-            // let CW = readFileSync(`./${OUT_DIR}/${CompiledWorker}`);
-            // CW = decorateAllFunctionCalls("CompiledWorker.js", CW.toString());
-            // writeFileSync(`./${OUT_DIR}/${CompiledWorker}`, CW.code);
+            let CW = readFileSync(`./${OUT_DIR}/${CompiledWorker}`);
+            CW = decorateAllFunctionCalls("CompiledWorker.js", CW.toString());
+            writeFileSync(`./${OUT_DIR}/${CompiledWorker}`, CW.code);
 
             esbuild.buildSync({
               entryPoints: [`./${OUT_DIR}/${CompiledWorker}`],
