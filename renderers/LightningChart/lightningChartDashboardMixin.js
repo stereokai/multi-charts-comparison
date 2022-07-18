@@ -119,7 +119,6 @@ const lightningChartDashboardMixin = (Base) =>
       }
 
       dashboard.setRowHeight(mainGraph.row, Math.round(rowHeight + axisHeight));
-      window.dashboard = dashboard;
       areaZoom.setHeight(visibleGraphs.length * rowHeight);
     }
 

@@ -145,7 +145,6 @@ const lightningChartChannelsMixin = (Base) =>
     }
 
     addChannel(channel, channelIndex, colorIndex, dontCreateSeries) {
-      window.graphs = this.graphs;
       const graph = LightningChartChannelsMixin.addChannel(
         this.dashboard,
         channel,

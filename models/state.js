@@ -92,7 +92,7 @@ export const channels = [
   { name: "Random 9", displacement: 20, smoothing: 0.9, dynamicYAxis: true },
   { name: "Random 10", displacement: 300, smoothing: 1.2, dynamicYAxis: true },
 ];
-window.channels = channels;
+
 // Cool channel;
 // dataMax: 73.07131716790869
 // dataMin: 4.542635989696553
