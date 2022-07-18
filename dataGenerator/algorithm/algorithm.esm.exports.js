@@ -1,3 +1,3 @@
 export { generateDataSeries };
 export { setTotalSamples };
-export { generatePunchedDataSeries };
+export { generateDataWithExtrapolations };

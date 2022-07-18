@@ -3,7 +3,7 @@
 //#endif
 
 workerpool.worker({
-  [DATA_GENERATOR_TASKS.generateDataSeries]: (data) => {
+  [DATA_GENERATOR.generateDataSeries]: (data) => {
     return generateDataSeries(
       data.samples,
       data.channel.dataMin,
@@ -16,8 +16,8 @@ workerpool.worker({
       data.channel.end
     );
   },
-  [DATA_GENERATOR_TASKS.generatePunchedDataSeries]: (data) => {
-    return generatePunchedDataSeries(
+  [DATA_GENERATOR.generateDataWithExtrapolations]: (data) => {
+    return generateDataWithExtrapolations(
       data.samples,
       data.channel.dataMin,
       data.channel.dataMax,
@@ -29,10 +29,10 @@ workerpool.worker({
       data.channel.end
     );
   },
-  [DATA_GENERATOR_TASKS.setTotalSamples]: (data) => {
+  [DATA_GENERATOR.setTotalSamples]: (data) => {
     setTotalSamples(data.samples);
   },
-  [DATA_GENERATOR_TASKS.limitArray]: (data) => {
+  [DATA_GENERATOR.limitArray]: (data) => {
     return limitArray(
       data.channelData,
       data.dataMin,

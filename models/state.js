@@ -131,9 +131,9 @@ function getChannelConfig(channel) {
 
 function getTaskConfig(...args) {
   if (!app.extraFeatures.extrapolation) {
-    return getDataTaskConfig(...args);
+    return DATA_GENERATOR.getTaskConfig.generateDataSeries(...args);
   } else {
-    return getPunchedDataTaskConfig(...args);
+    return DATA_GENERATOR.getTaskConfig.generateDataWithExtrapolations(...args);
   }
 }
 
@@ -197,7 +197,7 @@ export function getLimitedChannelData(channelDataGetter) {
   return dataOperation((queueTask) => {
     channels.forEach((channel, i) =>
       queueTask(
-        getLimitArrayTaskConfig(
+        DATA_GENERATOR.getTaskConfig.limitArray(
           getChannelConfig(channel),
           channelDataGetter(i),
           0.2

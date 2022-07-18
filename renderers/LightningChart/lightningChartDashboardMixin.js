@@ -612,11 +612,3 @@ const lightningChartDashboardMixin = (Base) =>
   };
 
 export default lightningChartDashboardMixin;
-
-// export function getLimitedChannelData(channelDataGetter) {
-//   return dataOperation((queueTask) => {
-//     channels.forEach((channel, i) =>
-//       queueTask(getLimitArrayTaskConfig(channel, channelDataGetter(i), 0.2))
-//     );
-//   });
-// }
