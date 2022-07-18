@@ -33,7 +33,7 @@ body {
 .toolbar-item:first-child {
   position: sticky;
   top: 0;
-  margin: auto -1rem 0 -2.5rem;
+  margin: 0 -1rem 0 -2.5rem;
   padding: 0 1rem 0 2.5rem;
   background: white;
 }
