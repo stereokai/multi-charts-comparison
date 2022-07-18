@@ -132,9 +132,9 @@ const lightningChartDashboardMixin = (Base) =>
         (ticks) =>
           ticks
             .setDateOrigin(new Date(getBaseDate()))
-            // .setGreatTickStyle((great) => {
-            //   return great.setLabelAlignment(0).setTickStyle(emptyLine);
-            // })
+            .setGreatTickStyle((great) => {
+              return great.setLabelAlignment(0).setTickStyle(emptyLine);
+            })
             .setMajorTickStyle((major) =>
               major.setGridStrokeStyle(emptyLine).setTickStyle(emptyLine)
             )
