@@ -171,7 +171,7 @@ function buildExtraFeatures() {
   xfToggleZoomBasedData.checked = app.extraFeatures.toggleZoomBasedData;
   xfToggleZoomBasedData.addEventListener("change", (event) => {
     app.extraFeatures.toggleZoomBasedData = event.target.checked;
-    graphs.api.toggleZoomBasedData(event.target.checked);
+    graphs.api.toggleZoomBasedData();
     event.target.blur();
   });
 

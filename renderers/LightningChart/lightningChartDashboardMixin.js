@@ -498,7 +498,6 @@ const lightningChartDashboardMixin = (Base) =>
             }
 
             graph.fullData = this.getChannelData(i);
-
             graph.fullBoundaries = graph.series.getBoundaries();
             graph.fullInterval = graph.yAxis.getInterval();
 
