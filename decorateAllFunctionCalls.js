@@ -28,7 +28,7 @@ export function decorateAllFunctionCalls(file, code) {
     return defaultValue;
   }
 
-  const res = recast.print(
+  return recast.print(
     recast.visit(
       recast.parse(code, {
         parser: {
@@ -93,6 +93,4 @@ export function decorateAllFunctionCalls(file, code) {
       }
     )
   );
-
-  return res;
 }

@@ -7,7 +7,9 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "cross-env NODE_ENV=development vite",
+    "dev-log-all": "cross-env LOG_ALL=1 NODE_ENV=development vite",
     "build": "cross-env NODE_ENV=production vite build",
+    "build-log-all": "cross-env LOG_ALL=1 NODE_ENV=production vite build",
     "preview": "vite preview"
   },
   "devDependencies": {

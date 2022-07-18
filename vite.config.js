@@ -65,6 +65,21 @@ if (process.env.NODE_ENV === "development") {
   replaceRules["//importScripts()"] = `importScripts("/${workerpool}")`;
 }
 
+function logAllFunctionCalls() {
+  console.log(process.env.LOG_ALL);
+  if (process.env.LOG_ALL) {
+    return {
+      name: "inject-console-logs",
+      transform(source, id) {
+        if (id.indexOf("node_modules") > -1) return null;
+        if (id.slice(-3) !== ".js") return null;
+        if (id.indexOf("Graphs.js") > -1) return null;
+        return decorateAllFunctionCalls(id, source);
+      },
+    };
+  }
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: `/${packageJson.name}/`,
@@ -86,6 +101,7 @@ export default defineConfig({
       partialDirectory: resolve(__dirname, "partials"),
     }),
     dynamicImport(),
+    logAllFunctionCalls(),
   ],
   resolve: {
     alias: [...aliasesForVite],
@@ -95,15 +111,7 @@ export default defineConfig({
     target: "esnext",
     rollupOptions: {
       plugins: [
-        {
-          name: "inject-console-logs",
-          transform(source, id) {
-            if (id.indexOf("node_modules") > -1) return null;
-            if (id.slice(-3) !== ".js") return null;
-            if (id.indexOf("Graphs.js") > -1) return null;
-            return decorateAllFunctionCalls(id, source);
-          },
-        },
+        logAllFunctionCalls(),
         {
           name: "minify-compiled-worker",
           writeBundle: (opts, bundle) => {
@@ -111,9 +119,12 @@ export default defineConfig({
             const CompiledWorker = Object.keys(bundle).find(
               (fileName) => fileName.indexOf("CompiledWorker") > -1
             );
-            let CW = readFileSync(`./${OUT_DIR}/${CompiledWorker}`);
-            CW = decorateAllFunctionCalls("CompiledWorker.js", CW.toString());
-            writeFileSync(`./${OUT_DIR}/${CompiledWorker}`, CW.code);
+
+            if (process.env.LOG_ALL) {
+              let CW = readFileSync(`./${OUT_DIR}/${CompiledWorker}`);
+              CW = decorateAllFunctionCalls("CompiledWorker.js", CW.toString());
+              writeFileSync(`./${OUT_DIR}/${CompiledWorker}`, CW.code);
+            }
 
             esbuild.buildSync({
               entryPoints: [`./${OUT_DIR}/${CompiledWorker}`],
