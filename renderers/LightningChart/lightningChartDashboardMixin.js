@@ -600,6 +600,21 @@ const lightningChartDashboardMixin = (Base) =>
     afterUpdate() {
       requestAnimationFrame(() => {
         this.toggleZoomBasedData();
+        channels.forEach((channel, channelIndex) => {
+          if (channel.isSticky) {
+            channel.pinnedGraph.series.clear();
+            channel.pinnedGraph.series.add(
+              this.graphs[channelIndex].series.kc[0].La
+            );
+          }
+
+          if (channel.isGrouped) {
+            this.mainGraph.series[channelIndex].clear();
+            this.mainGraph.series[channelIndex].add(
+              this.graphs[channelIndex].series.kc[0].La
+            );
+          }
+        });
       });
       if (super.afterUpdate) {
         super.afterUpdate();
