@@ -4,6 +4,7 @@ const DATA_GENERATOR = {
   limitArray: "limitArray",
   punchHolesInArray: "punchHolesInArray",
   setTotalSamples: "setTotalSamples",
+  generateData: "generateData",
 };
 
 DATA_GENERATOR.getTaskConfig = {
@@ -30,14 +31,18 @@ DATA_GENERATOR.getTaskConfig = {
     replaceWith,
   }),
   [DATA_GENERATOR.limitArray]: (channel, channelData, limitFactor) => ({
-    array: channelData,
+    data: channelData,
     dataMin: channel.dataMin,
     dataMax: channel.dataMax,
     limitFactor,
   }),
-  [DATA_GENERATOR.punchHolesInArray]: (array, replaceWith) => ({
-    array,
+  [DATA_GENERATOR.punchHolesInArray]: (data, replaceWith) => ({
+    data,
     replaceWith,
+  }),
+  [DATA_GENERATOR.generateData]: (config, transforms) => ({
+    config,
+    transforms,
   }),
 };
 

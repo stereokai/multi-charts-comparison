@@ -2,41 +2,58 @@
 //importScripts();
 //#endif
 
-workerpool.worker({
-  [DATA_GENERATOR.generateDataSeries]: (data) => {
+const WorkerAPI = {
+  [DATA_GENERATOR.generateDataSeries]: (config) => {
     return generateDataSeries(
-      data.samples,
-      data.dataMin,
-      data.dataMax,
-      data.smoothing,
-      data.displacement,
-      data.displacementRatio,
-      data.easingType,
-      data.start,
-      data.end
+      config.samples,
+      config.dataMin,
+      config.dataMax,
+      config.smoothing,
+      config.displacement,
+      config.displacementRatio,
+      config.easingType,
+      config.start,
+      config.end
     );
   },
-  [DATA_GENERATOR.generateDataWithExtrapolations]: (data) => {
-    return generateDataWithExtrapolations(
-      data.replaceWith,
-      data.samples,
-      data.dataMin,
-      data.dataMax,
-      data.smoothing,
-      data.displacement,
-      data.displacementRatio,
-      data.easingType,
-      data.start,
-      data.end
+  [DATA_GENERATOR.generateDataWithExtrapolations]: (config) => {
+    const { data, dataMin, dataMax } =
+      WorkerAPI[DATA_GENERATOR.generateDataSeries](config);
+
+    return {
+      data: WorkerAPI[DATA_GENERATOR.punchHolesInArray]({
+        data,
+        replaceWith: config.replaceWith,
+      }),
+      dataMin,
+      dataMax,
+    };
+  },
+  [DATA_GENERATOR.setTotalSamples]: (config) => {
+    setTotalSamples(config.samples);
+  },
+  [DATA_GENERATOR.limitArray]: (config) => {
+    return limitArray(
+      config.data,
+      config.dataMin,
+      config.dataMax,
+      config.limitFactor
     );
   },
-  [DATA_GENERATOR.setTotalSamples]: (data) => {
-    setTotalSamples(data.samples);
+  [DATA_GENERATOR.punchHolesInArray]: (config) => {
+    return punchHolesInArray(config.data, config.replaceWith);
   },
-  [DATA_GENERATOR.limitArray]: (data) => {
-    return limitArray(data.array, data.dataMin, data.dataMax, data.limitFactor);
+  [DATA_GENERATOR.generateData]: (options) => {
+    const hasTransforms = options.transforms && options.transforms.length;
+
+    if (!hasTransforms) {
+      return WorkerAPI[options.config.name](options.config);
+    }
+
+    return options.transforms.reduce((data, transformConfig) => {
+      return WorkerAPI[transformConfig.name]({ ...transformConfig, data });
+    }, WorkerAPI[DATA_GENERATOR.generateDataSeries](options.config));
   },
-  [DATA_GENERATOR.punchHolesInArray]: (data) => {
-    return punchHolesInArray(data.array, data.replaceWith);
-  },
-});
+};
+
+workerpool.worker(WorkerAPI);
