@@ -10,7 +10,7 @@ body {
   display: flex;
   align-items: stretch;
   height: 100vh;
-  padding: 0 15px;
+  padding: 0 1rem 0 0;
   margin: 0;
   color: #2c3e50;
 }
@@ -20,7 +20,7 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   border: none;
-  padding: 0 1rem;
+  padding: 0 1rem 0 2.5rem;
 }
 
 .toolbar-main {
@@ -28,6 +28,14 @@ body {
   flex-direction: column;
   text-align: center;
   row-gap: 1rem;
+}
+
+.toolbar-item:first-child {
+  position: sticky;
+  top: 0;
+  margin: auto -1rem 0 -2.5rem;
+  padding: 0 1rem 0 2.5rem;
+  background: white;
 }
 
 #chart-header {
@@ -110,6 +118,8 @@ body {
 #renderers > .button {
   display: inline-block;
   margin: 0.7rem;
+  margin-left: 0;
+  word-break: break-all;
 }
 
 #chart-header.show-loader::before {
