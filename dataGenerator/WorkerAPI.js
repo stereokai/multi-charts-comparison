@@ -41,28 +41,33 @@ const WorkerAPI = {
     );
   },
   [DATA_GENERATOR.punchHolesInArray]: (config) => {
-    return punchHolesInArray(config.data, config.replaceWith);
+    return {
+      data: punchHolesInArray(config.data, config.transform.replaceWith),
+    };
   },
   [DATA_GENERATOR.transformData]: (config) => {
-    return config.transforms.reduce((prevTaskResult, transformConfig) => {
-      const transform = WorkerAPI[transformConfig.name];
-      const result = transform({
-        ...transformConfig.data,
-        data: prevTaskResult.data,
-      });
+    return ({ data, dataMin, dataMax } = config.transforms.reduce(
+      (prevTaskResult, transformConfig) => {
+        const transform = WorkerAPI[transformConfig.name];
+        const result = transform({
+          ...prevTaskResult,
+          transform: transformConfig.data,
+        });
 
-      if (Array.isArray(result)) {
+        if (Array.isArray(result)) {
+          return {
+            ...prevTaskResult,
+            data: result,
+          };
+        }
+
         return {
           ...prevTaskResult,
-          data: result,
+          ...result,
         };
-      }
-
-      return {
-        ...prevTaskResult,
-        ...result,
-      };
-    }, config.data);
+      },
+      config.channel
+    ));
   },
   [DATA_GENERATOR.generateAndTransformData]: (config) => {
     const hasTransforms = config.transforms && config.transforms.length;
@@ -71,7 +76,7 @@ const WorkerAPI = {
     }
 
     return WorkerAPI[DATA_GENERATOR.transformData]({
-      data: WorkerAPI[config.generate.name](config.generate.data),
+      channel: WorkerAPI[config.generate.name](config.generate.data),
       transforms: config.transforms,
     });
   },

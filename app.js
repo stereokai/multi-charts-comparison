@@ -15,6 +15,8 @@ Handlebars.registerHelper("ifeq", function (a, b, options) {
   return options.inverse(this);
 });
 
+const channelFilter = (channel) =>
+  !channel.isHidden || channel.isGrouped || channel.isSticky;
 let channelListItemTemplate;
 let montageListItemTemplate;
 let channelList;
@@ -89,10 +91,12 @@ function updateTotalSamples() {
 }
 
 function updateGraphSettingsNow() {
+  const filter = app.extraFeatures.extrapolation ? channelFilter : undefined;
   graphs.onSettingChange(
     app.channels.value,
     app.samples.value,
-    app.total.value
+    app.total.value,
+    filter
   );
 }
 
@@ -195,7 +199,7 @@ function buildExtraFeatures() {
   xfExtrapolation.checked = app.extraFeatures.extrapolation;
   xfExtrapolation.addEventListener("change", (event) => {
     app.extraFeatures.extrapolation = event.target.checked;
-    graphs.transformAllChannels();
+    graphs.transformAllChannels(undefined, channelFilter);
     event.target.blur();
   });
 
@@ -203,7 +207,7 @@ function buildExtraFeatures() {
   xfToggleEvents.checked = app.extraFeatures.events;
   xfToggleEvents.addEventListener("change", (event) => {
     app.extraFeatures.events = event.target.checked;
-    // graphs.api.toggleEvents();
+    graphs.api.toggleEvents();
     event.target.blur();
   });
 

@@ -45,8 +45,13 @@ DATA_GENERATOR.getTaskConfig = {
     generate,
     transforms,
   }),
-  [DATA_GENERATOR.transformData]: (data, transforms) => ({
-    data: { data },
+  [DATA_GENERATOR.transformData]: (channel, transforms) => ({
+    channel: {
+      ...DATA_GENERATOR.getTaskConfig[DATA_GENERATOR.generateDataSeries](
+        channel
+      ).data,
+      data: channel.data,
+    },
     transforms,
   }),
 };

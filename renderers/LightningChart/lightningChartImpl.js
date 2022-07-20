@@ -38,7 +38,7 @@ export default class LightningChartImpl {
     );
   }
 
-  update(dataset = [], timeSeries) {
+  update(dataset = [], timeSeries, channelFilter) {
     if (this.hasInitialized) {
       this.markEvent();
     }
@@ -49,16 +49,25 @@ export default class LightningChartImpl {
 
     const { graphs } = this;
     const currGraphsLength = graphs.length;
-    this.hasChannelsChanged = false;
 
-    dataset.forEach((channelData, i) => {
-      let graph = graphs[i];
-      let channelIndex = i;
+    let filteredChannels = 0,
+      i = 0,
+      j = 0;
+    while (i < channels.length && j < dataset.length) {
+      let channelIndex = filteredChannels + j;
+      i++;
+      if (channelFilter && !channelFilter(channels[channelIndex])) {
+        filteredChannels++;
+        continue;
+      }
+
+      let graph = graphs[channelIndex];
+      const channelData = dataset[j];
+      j++;
 
       // Add new channels
       if (channels.length !== currGraphsLength) {
-        this.hasChannelsChanged = true;
-        channelIndex = currGraphsLength + i;
+        channelIndex = currGraphsLength + channelIndex;
         graphs.push(this.addChannel(channels[channelIndex], channelIndex));
         graph = graphs[channelIndex];
         this.registerZoomEvents(graph);
@@ -66,35 +75,38 @@ export default class LightningChartImpl {
 
       // Update existing channels
       graph.series.clear();
+
+      if (channelData.data.length !== timeSeries.length) {
+        console.error(
+          "Data length mismatch",
+          channelData.data.length,
+          timeSeries.length
+        );
+        return;
+      }
       graph.series.addArraysXY(timeSeries, channelData.data);
-    });
+    }
 
     // Remove channels outside of dataset
     graphs
       .splice(channels.length, graphs.length - channels.length)
       .forEach((graph) => {
-        this.hasChannelsChanged = true;
         graph.chart.dispose();
         for (let key in graph) {
           graph[key] = null;
         }
       });
 
-    this.afterUpdate();
+    this.afterUpdate(graphs.length !== currGraphsLength);
   }
 
-  afterUpdate() {
-    if (!this.hasInitialized || this.hasChannelsChanged) {
-      this.setXAxisStyle();
-      this.syncXAxesZoom();
-    }
+  afterUpdate(hasChannelsChanged) {
     requestAnimationFrame(() => {
-      if (!this.hasInitialized || this.hasChannelsChanged) {
-        // Synchronize zoom and scroll on all channels
-        this.updateDashboardRowHeights();
-      }
-      this.resetView();
       this.reportRenderEvent();
     });
+
+    if (super.afterUpdate) {
+      super.afterUpdate(hasChannelsChanged);
+    }
   }
 }

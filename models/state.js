@@ -129,7 +129,7 @@ function getChannelConfig(channel) {
   };
 }
 
-function getTransforms() {
+export function getTransforms() {
   const transforms = [];
 
   if (app.extraFeatures.extrapolation) {
@@ -148,38 +148,101 @@ function getRandomChannel(number) {
   };
 }
 
-export function regenerateAllChannels(samplesPerChannel) {
+export function regenerateAllChannels(
+  samplesPerChannel,
+  channelFilter = () => true
+) {
   return dataOperation((queueTask) => {
-    channels.forEach((channel) =>
-      queueTask(
-        DATA_GENERATOR.getTaskConfig.generateAndTransformData(
-          DATA_GENERATOR.getTaskConfig.generateDataSeries(
-            getChannelConfig(channel),
-            samplesPerChannel
-          ),
-          getTransforms()
-        )
-      )
-    );
+    channels.forEach((channel, channelIndex) => {
+      if (channelFilter(channels[channelIndex])) {
+        queueTask(
+          DATA_GENERATOR.getTaskConfig.generateAndTransformData(
+            DATA_GENERATOR.getTaskConfig.generateDataSeries(
+              getChannelConfig(channel),
+              samplesPerChannel
+            ),
+            getTransforms()
+          )
+        );
+      }
+    });
   });
 }
 
-export function transformAllChannels(channelDataGetter, samplesPerChannel) {
+export function transformAllChannels(
+  channelDataGetter,
+  samplesPerChannel,
+  channelFilter = () => true
+) {
   const transforms = getTransforms();
   if (!transforms.length) {
-    return regenerateAllChannels(samplesPerChannel);
+    return regenerateAllChannels(samplesPerChannel, channelFilter);
   }
 
-  return dataOperation((queueTask) => {
-    channels.forEach((channel, i) =>
-      queueTask(
-        DATA_GENERATOR.getTaskConfig.transformData(
-          channelDataGetter(i),
-          transforms
-        )
-      )
-    );
+  const mismatchedDataLengthChannels = [];
+  const transformOperation = dataOperation((queueTask) => {
+    channels.forEach((channel, channelIndex) => {
+      if (channelFilter(channels[channelIndex])) {
+        const channelData = channelDataGetter(channelIndex);
+        if (channelData.length !== samplesPerChannel) {
+          mismatchedDataLengthChannels.push({
+            channel,
+            originalIndex: channelIndex,
+          });
+          return;
+        }
+
+        queueTask(
+          DATA_GENERATOR.getTaskConfig.transformData(
+            {
+              ...getChannelConfig(channel),
+              data: channelData,
+            },
+            transforms
+          )
+        );
+      }
+    });
   });
+
+  if (mismatchedDataLengthChannels.length) {
+    return transformOperation.then((transformDataset) => {
+      return Promise.all([
+        regenerateAllChannels(
+          samplesPerChannel,
+          (channel) =>
+            !!mismatchedDataLengthChannels.filter(
+              (channelObj) => channelObj.channel === channel
+            ).length
+        ),
+        transformDataset,
+      ]).then((results) => {
+        const [generateDataset, transformDataset] = results;
+        const combinedDataSet = new Array(
+          generateDataset.length + transformDataset.length
+        );
+
+        mismatchedDataLengthChannels.forEach((channelObj, i) => {
+          combinedDataSet[channelObj.originalIndex] = generateDataset[i];
+        });
+
+        for (
+          let i = 0, j = 0;
+          i < combinedDataSet.length && j < transformDataset.length;
+          i++
+        ) {
+          if (combinedDataSet[i] === undefined) {
+            combinedDataSet[i] = transformDataset[j];
+            j++;
+          }
+        }
+
+        return combinedDataSet.filter(Boolean);
+      });
+    });
+  }
+
+  return transformOperation;
 }
 
 export function addChannels(
@@ -237,4 +300,10 @@ export function getLimitedChannelData(channelDataGetter) {
       )
     );
   });
+}
+
+export function mapChannels(fn = () => {}) {
+  for (let i = 0; i < channels.length; i++) {
+    fn(channels[i], i);
+  }
 }

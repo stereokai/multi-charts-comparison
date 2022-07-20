@@ -28,6 +28,13 @@ const lightningChartChannelsMixin = (Base) =>
       return LightningChartChannelsMixin.CHART_GAP;
     }
 
+    static SERIES_DEFAULT_FILL_STYLE = new SolidFill({
+      color: ColorCSS("white"),
+    });
+    get SERIES_DEFAULT_FILL_STYLE() {
+      return LightningChartChannelsMixin.SERIES_DEFAULT_FILL_STYLE;
+    }
+
     static addChannel(
       dashboard,
       channel,
@@ -71,9 +78,7 @@ const lightningChartChannelsMixin = (Base) =>
           })
         )
         .setSeriesBackgroundFillStyle(
-          new SolidFill({
-            color: ColorCSS("white"),
-          })
+          LightningChartChannelsMixin.SERIES_DEFAULT_FILL_STYLE
         );
 
       const xAxis = chart
@@ -89,7 +94,7 @@ const lightningChartChannelsMixin = (Base) =>
         .setChartInteractions(false)
         .setStrokeStyle(emptyLine)
         .setTitle(channel.name)
-        .setInterval(yAxisBounds.min, yAxisBounds.max)
+        // .setInterval(yAxisBounds.min, yAxisBounds.max)
         .setTitleFont(new FontSettings({ size: 12 }))
         .setTitleFillStyle(new SolidFill({ color: ColorHEX("#6e7079") }))
         .setTitleRotation(0)
@@ -155,20 +160,20 @@ const lightningChartChannelsMixin = (Base) =>
 
       //attaching an on click event to the seires
       chart.onSeriesBackgroundMouseClick((chart, event) => {
-        //convert client location to engine canvas location
-        //  const engineLocation = chart.engine.clientLocation2Engine( event.clientX, event.clientY )
-        try {
-          //fetching the data point and other parameters. The location parameter gives the data point
-          const res = series.solveNearestFromScreen(
-            chart.engine.clientLocation2Engine(event.clientX, event.clientY)
-          );
-          const x = parseFloat(res.resultTableContent[1][1]);
-          const y = parseFloat(res.resultTableContent[2][1]);
-          this.addEvent({ x, y }, channelIndex);
-        } catch (e) {
-          //#if _DEVELOPMENT
-          console.log(`Could not add event marker, ${e}`);
-          //#endif
+        if (event.metaKey) {
+          try {
+            //fetching the data point and other parameters. The location parameter gives the data point
+            const res = series.solveNearestFromScreen(
+              chart.engine.clientLocation2Engine(event.clientX, event.clientY)
+            );
+            const x = parseFloat(res.resultTableContent[1][1]);
+            const y = parseFloat(res.resultTableContent[2][1]);
+            this.addEvent({ x, y }, channelIndex);
+          } catch (e) {
+            //#if _DEVELOPMENT
+            console.log(`Could not add event marker, ${e}`);
+            //#endif
+          }
         }
         this.markers.forEach((chartMarker) => {
           chartMarker.setResultTableVisibility(UIVisibilityModes.never);
@@ -185,6 +190,16 @@ const lightningChartChannelsMixin = (Base) =>
     getChannelData(channelIndex) {
       const channelData = [];
       const graph = this.graphs[channelIndex];
+
+      try {
+        const originalData = graph.series.kc[0].La;
+        const originalDataLength = originalData.length;
+      } catch (e) {
+        //#if _DEVELOPMENT
+        console.error(`Could not get channel ${channelIndex} data, ${e}`);
+        //#endif
+        return [];
+      }
       for (let i = 0; i < graph.series.kc[0].La.length; i++) {
         channelData[i] = graph.series.kc[0].La[i].y;
       }

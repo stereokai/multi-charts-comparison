@@ -1,10 +1,16 @@
 import { dataOperation } from "@/dataGenerator/AsyncDataGenerator.js";
-import { getBaseDate } from "@/Graphs/graphCommon";
-import { app, channels, getChannelYAxisBounds } from "@/models/state.js";
+import { getBaseDate, transformAllChannels } from "@/Graphs/graphCommon";
+import {
+  app,
+  channels,
+  getChannelYAxisBounds,
+  mapChannels,
+} from "@/models/state.js";
 import {
   AxisTickStrategies,
   ColorCSS,
   ColorHEX,
+  emptyFill,
   emptyLine,
   lightningChart,
   SolidFill,
@@ -114,7 +120,7 @@ const lightningChartDashboardMixin = (Base) =>
         if (allVisibleGraphs.includes(row)) {
           dashboard.setRowHeight(row, Math.round(rowHeight));
         } else {
-          dashboard.setRowHeight(row, 0.00001);
+          dashboard.setRowHeight(row, 0);
         }
       }
 
@@ -154,7 +160,7 @@ const lightningChartDashboardMixin = (Base) =>
       this.axisSyncHandle = synchronizeAxisIntervals(...axes);
     }
 
-    resetView() {
+    zoomFullyOut() {
       const { mainGraph, minX, maxX } = this;
       mainGraph.xAxis.setInterval(minX, maxX, false, true);
     }
@@ -181,9 +187,27 @@ const lightningChartDashboardMixin = (Base) =>
       if (isHidden) {
         graph.series.dispose();
         graph.yAxis.dispose();
+        graph.xAxis.dispose();
+
+        graph.chart.setSeriesBackgroundFillStyle(emptyFill);
       } else {
         graph.series.restore();
         graph.yAxis.restore();
+        graph.xAxis.restore();
+
+        graph.chart.setSeriesBackgroundFillStyle(
+          this.SERIES_DEFAULT_FILL_STYLE
+        );
+
+        if (app.extraFeatures.extrapolation) {
+          const channel = channels[channelIndex];
+          if (!channel.hasTransforms)
+            transformAllChannels(
+              undefined,
+              (channelFilter) => channelFilter === channel
+            );
+        }
+
         this.toggleZoomBasedData({
           start: channelIndex,
           end: channelIndex + 1,
@@ -218,10 +242,15 @@ const lightningChartDashboardMixin = (Base) =>
           channelIndex // Use same color as the channel
         );
 
+        channel.pinnedGraph = pinnedGraph;
         pinnedGraph.pinnedIndex = pinnedIndex;
         pinnedGraphs.push(pinnedGraph);
         pinnedGraph.series.add(graph.series.kc[0].La);
-        channel.pinnedGraph = pinnedGraph;
+
+        requestAnimationFrame(() => {
+          const yAxisBounds = getChannelYAxisBounds(channel);
+          pinnedGraph.yAxis.setInterval(yAxisBounds.min, yAxisBounds.max);
+        });
       } else {
         if (!channel.pinnedGraph) {
           return;
@@ -289,9 +318,11 @@ const lightningChartDashboardMixin = (Base) =>
         series.__bounds = getChannelYAxisBounds(channel);
         mainGraph.series[channelIndex] = series;
 
-        mainGraph.repositionYAxis();
-
         series.add(graph.series.kc[0].La);
+
+        requestAnimationFrame(() => {
+          mainGraph.repositionYAxis();
+        });
       } else {
         if (!this.mainGraph.isGroup) {
           return;
@@ -399,6 +430,16 @@ const lightningChartDashboardMixin = (Base) =>
       xAxis.pan(distance / pixelSizeX);
     }
 
+    toggleEvents() {
+      if (!app.extraFeatures.events) {
+        this.markers.forEach((chartMarker) => {
+          chartMarker.setResultTableVisibility(UIVisibilityModes.never);
+          chartMarker.dispose();
+          this.markers.splice(this.markers.indexOf(chartMarker), 1);
+        });
+      }
+    }
+
     addEvent(point, channelIndex) {
       if (!app.extraFeatures.events) {
         return;
@@ -489,16 +530,16 @@ const lightningChartDashboardMixin = (Base) =>
       const graphs = subset
         ? this.graphs.slice(subset.start, subset.end)
         : this.graphs;
-
       if (app.extraFeatures.toggleZoomBasedData) {
         this.graphEvents.dataOperationStarted();
         dataOperation((queueTask) => {
           graphs.forEach((graph, i) => {
-            if (channels[i] && channels[i].isHidden) {
+            const channelIndex = i + (subset ? subset.start : 0);
+            if (channels[channelIndex] && channels[channelIndex].isHidden) {
               return;
             }
 
-            graph.fullData = this.getChannelData(i);
+            graph.fullData = this.getChannelData(channelIndex);
             graph.fullBoundaries = graph.series.getBoundaries();
             graph.fullInterval = graph.yAxis.getInterval();
 
@@ -514,46 +555,58 @@ const lightningChartDashboardMixin = (Base) =>
           });
         }).then((dataset) => {
           this.graphEvents.dataOperationEnded();
-          let hiddenChannels = 0;
-          dataset.forEach((channelData, i) => {
-            if (channels[i] && channels[i].isHidden) {
+          let hiddenChannels = 0,
+            i = 0,
+            j = 0;
+          while (i < channels.length && j < dataset.length) {
+            let channelIndex = hiddenChannels + j + (subset ? subset.start : 0);
+            i++;
+            if (channels[channelIndex] && channels[channelIndex].isHidden) {
               hiddenChannels++;
+              continue;
             }
 
-            const graph = this.graphs[i + hiddenChannels];
+            const graph = this.graphs[channelIndex];
+            const channelData = dataset[j];
+            j++;
+
             graph.limitedData = channelData.data;
             graph.limitedDataMin = channelData.dataMin;
             graph.limitedDataMax = channelData.dataMax;
-          });
+          }
 
           const initialInterval = this.mainGraph.xAxis.getInterval();
           this.zoomBasedDataHandler.call(
             this,
             initialInterval.start,
-            initialInterval.end
+            initialInterval.end,
+            true
           );
 
+          if (this.zoomBasedDataCB) {
+            this.graphs[0].xAxis.offScaleChange(this.zoomBasedDataCB);
+          }
           this.zoomBasedDataCB = this.graphs[0].xAxis.onScaleChange(
             this.zoomBasedDataHandler.bind(this)
           );
         });
       } else {
-        this.graphs[0].yAxis.offScaleChange(this.zoomBasedDataCB);
+        this.graphs[0].xAxis.offScaleChange(this.zoomBasedDataCB);
         this.zoomBasedDataHandler(0, 0);
         graphs.forEach((graph) => {
-          graph.fullData = null;
-          graph.fullBoundaries = null;
-          graph.fullInterval = null;
-          graph.limitedData = null;
-          graph.limitedDataMin = null;
-          graph.limitedDataMax = null;
+          delete graph.fullData;
+          delete graph.fullBoundaries;
+          delete graph.fullInterval;
+          delete graph.limitedData;
+          delete graph.limitedDataMin;
+          delete graph.limitedDataMax;
         });
       }
     }
 
-    zoomBasedDataHandler(start, end) {
+    zoomBasedDataHandler(start, end, force) {
       if (
-        !this.isShowingLimitedZoomBasedData &&
+        (force || !this.isShowingLimitedZoomBasedData) &&
         Math.abs(end - start) > this.maxX / 3
       ) {
         const label = document.querySelector("#label-zoom-based-data");
@@ -563,17 +616,19 @@ const lightningChartDashboardMixin = (Base) =>
         }, 1000);
 
         this.isShowingLimitedZoomBasedData = true;
-        this.graphs.forEach((graph, i) => {
-          if (channels[i] && channels[i].isHidden) return;
+        for (let i = 0; i < this.graphs.length; i++) {
+          if (channels[i] && channels[i].isHidden) continue;
+          const graph = this.graphs[i];
+
           graph.series.clear();
           graph.series.addArraysXY(this.timeSeries, graph.limitedData);
           graph.yAxis.setInterval(graph.limitedDataMin, graph.limitedDataMax);
           graph.yAxis.setMouseInteractions(false);
           graph.yAxis.setChartInteractions(false);
-        });
+        }
         // this.syncXAxesZoom(false);
       } else if (
-        this.isShowingLimitedZoomBasedData &&
+        (force || this.isShowingLimitedZoomBasedData) &&
         Math.abs(end - start) <= this.maxX / 3
       ) {
         const label = document.querySelector("#label-zoom-based-data");
@@ -583,8 +638,10 @@ const lightningChartDashboardMixin = (Base) =>
         }, 1000);
 
         this.isShowingLimitedZoomBasedData = false;
-        this.graphs.forEach((graph, i) => {
-          if (channels[i] && channels[i].isHidden) return;
+        for (let i = 0; i < this.graphs.length; i++) {
+          if (channels[i] && channels[i].isHidden) continue;
+
+          const graph = this.graphs[i];
           graph.series.clear();
           graph.series.addArraysXY(this.timeSeries, graph.fullData);
 
@@ -594,31 +651,74 @@ const lightningChartDashboardMixin = (Base) =>
           );
           graph.yAxis.setMouseInteractions(false);
           graph.yAxis.setChartInteractions(false);
-        });
+        }
       }
     }
 
-    afterUpdate() {
-      requestAnimationFrame(() => {
-        this.toggleZoomBasedData();
-        channels.forEach((channel, channelIndex) => {
-          if (channel.isSticky) {
-            channel.pinnedGraph.series.clear();
-            channel.pinnedGraph.series.add(
-              this.graphs[channelIndex].series.kc[0].La
-            );
-          }
+    updateSecondaryGraphs(channel, channelIndex) {
+      if (channel.isSticky) {
+        const graph = this.graphs[channelIndex];
+        const pinnedGraph = channel.pinnedGraph;
+        pinnedGraph.series.clear();
 
-          if (channel.isGrouped) {
-            this.mainGraph.series[channelIndex].clear();
-            this.mainGraph.series[channelIndex].add(
-              this.graphs[channelIndex].series.kc[0].La
-            );
-          }
+        if (channel.isHidden) {
+          graph.series.restore();
+          requestAnimationFrame(() => {
+            pinnedGraph.series.add(graph.series.kc[0].La);
+            graph.series.dispose();
+            const yAxisBounds = getChannelYAxisBounds(channel);
+            pinnedGraph.yAxis.setInterval(yAxisBounds.min, yAxisBounds.max);
+          });
+        } else {
+          pinnedGraph.series.add(graph.series.kc[0].La);
+          const yAxisBounds = getChannelYAxisBounds(channel);
+          pinnedGraph.yAxis.setInterval(yAxisBounds.min, yAxisBounds.max);
+        }
+      }
+
+      if (channel.isGrouped) {
+        const graph = this.graphs[channelIndex];
+        this.mainGraph.series[channelIndex].clear();
+
+        if (channel.isHidden) {
+          graph.series.restore();
+          requestAnimationFrame(() => {
+            this.mainGraph.series[channelIndex].add(graph.series.kc[0].La);
+            graph.series.dispose();
+            this.mainGraph.repositionYAxis();
+          });
+        } else {
+          this.mainGraph.series[channelIndex].add(graph.series.kc[0].La);
+          this.mainGraph.repositionYAxis();
+        }
+      }
+    }
+
+    updateGraphsYAxis(channel, channelIndex) {
+      const graph = this.graphs[channelIndex];
+      const yAxisBounds = getChannelYAxisBounds(channel);
+      graph.yAxis.setInterval(yAxisBounds.min, yAxisBounds.max);
+    }
+
+    afterUpdate(hasChannelsChanged) {
+      if (!this.hasInitialized || hasChannelsChanged) {
+        this.setXAxisStyle();
+        this.syncXAxesZoom();
+      }
+
+      requestAnimationFrame(() => {
+        this.updateDashboardRowHeights();
+        this.zoomFullyOut();
+        this.toggleZoomBasedData();
+
+        mapChannels((channel, channelIndex) => {
+          this.updateSecondaryGraphs(channel, channelIndex);
+          this.updateGraphsYAxis(channel, channelIndex);
         });
       });
+
       if (super.afterUpdate) {
-        super.afterUpdate();
+        super.afterUpdate(hasChannelsChanged);
       }
     }
   };
